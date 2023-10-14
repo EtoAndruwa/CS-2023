@@ -7,11 +7,15 @@ int main()
 
     int msg_id = get_msg_id();
     usr_ctor(&usr_struct);
-    print_user(&usr_struct);
+    // print_user(&usr_struct);
 
-    connect_to_web(msg_id, &msg_struct, &usr_struct);
-    client_logic();
+    int ret = connect_to_web(msg_id, &msg_struct, &usr_struct);
+    if(ret == SUCCESS)
+    {
+        client_logic();
+    }
+
     leave_web(msg_id, &msg_struct, &usr_struct);
-    
+
     return 0;
 }

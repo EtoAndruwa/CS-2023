@@ -9,22 +9,21 @@ int try_to_enter_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* u
     msg_struct_ptr->sender_id   = usr_struct_ptr->usr_id;
     strcpy(msg_struct_ptr->text, usr_struct_ptr->usr_name);
 
-    printf("======\n");
-    printf("msg_struct_ptr->msg_type    = %ld\n", msg_struct_ptr->msg_type);
-    printf("msg_struct_ptr->sender_id   = %ld\n", msg_struct_ptr->sender_id);
-    printf("msg_struct_ptr->receiver_id = %ld\n", msg_struct_ptr->receiver_id);
-    printf("msg_struct_ptr-> = %s\n", msg_struct_ptr->text);
-    printf("======\n");
+    // printf("======\n");
+    // printf("msg_struct_ptr->msg_type    = %ld\n", msg_struct_ptr->msg_type);
+    // printf("msg_struct_ptr->sender_id   = %ld\n", msg_struct_ptr->sender_id);
+    // printf("msg_struct_ptr->receiver_id = %ld\n", msg_struct_ptr->receiver_id);
+    // printf("msg_struct_ptr-> = %s\n", msg_struct_ptr->text);
+    // printf("======\n");
+    // printf("msg_id %d\n", msg_id);
+    // printf("msg_size %d\n", MSG_SIZE);
 
-    printf("msg_id %d\n", msg_id);
-
-    printf("msg_size %d\n", MSG_SIZE);
     int ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
 
     if (ret_val == -1)
     {
         printf("errno %d\n", errno);
-        printf("ERROR: cannot send message for user initialization\n");
+        printf("ERROR: cannot send message for user initialization to the server.\n");
         return -1;
     }
 }
@@ -59,22 +58,19 @@ int leave_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_stru
     msg_struct_ptr->sender_id   = usr_struct_ptr->usr_id;
     msg_struct_ptr->receiver_id = 0;
 
-    printf("======\n");
-    printf("msg_struct_ptr->msg_type    = %ld\n", msg_struct_ptr->msg_type);
-    printf("msg_struct_ptr->sender_id   = %ld\n", msg_struct_ptr->sender_id);
-    printf("msg_struct_ptr->receiver_id = %ld\n", msg_struct_ptr->receiver_id);
-    printf("======\n");
+    // printf("======\n");
+    // printf("msg_struct_ptr->msg_type    = %ld\n", msg_struct_ptr->msg_type);
+    // printf("msg_struct_ptr->sender_id   = %ld\n", msg_struct_ptr->sender_id);
+    // printf("msg_struct_ptr->receiver_id = %ld\n", msg_struct_ptr->receiver_id);
+    // printf("======\n");
+    // printf("msg_id %d\n", msg_id);
 
-    printf("msg_id %d\n", msg_id);
-
-    int msg_size = sizeof(msg_struct_ptr->sender_id) + sizeof(msg_struct_ptr->receiver_id) + sizeof(msg_struct_ptr->text);
-    printf("msg_size %d\n", msg_size);
-    int ret_val = msgsnd(msg_id, msg_struct_ptr, msg_size, 0);
+    int ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
 
     if (ret_val == -1)
     {
         printf("errno %d\n", errno);
-        printf("ERROR: cannot send message for user deletion\n");
+        printf("ERROR: cannot send message for user deletion to the server.\n");
         return -1;
     }
 }
@@ -123,37 +119,66 @@ int get_package_from_server(const int msg_id, MSG_struct* msg_struct_ptr, USR_st
     if (ret_val == -1)
     {
         printf("errno %d\n", errno);
-        printf("ERROR: cannot get the feedback package from the server\n");
+        printf("ERROR: cannot get the feedback package from the server.\n");
         return NO_FEEDBACK;
     }
     else
     {
         if (msg_struct_ptr->logic_package == SERVER_FULL)
         {
-            printf("Server is full, try to connect to the server later\n");
+            printf("\nServer is full, try to connect to the server later.\n");
             return NO_FEEDBACK;
         }
         else
         {
-            printf("You was connected to the server\n");
+            printf("You was connected to the server.\n");
             return SUCCESS;
         }
     }
 }
 
-void connect_to_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struct_ptr)
+int connect_to_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struct_ptr)
 {
-    bool coonected = false;
-    while(!coonected)
-    {
-        try_to_enter_web(msg_id, msg_struct_ptr, usr_struct_ptr);
-        int ret = get_package_from_server(msg_id, msg_struct_ptr, usr_struct_ptr);
+    try_to_enter_web(msg_id, msg_struct_ptr, usr_struct_ptr);
+    int ret = get_package_from_server(msg_id, msg_struct_ptr, usr_struct_ptr);
 
-        if(ret == SUCCESS)
+    if(ret != SUCCESS)
+    {   
+        char key = 0;
+        while (key != 'q')
         {
-            coonected = true;
-        }
+            printf("Enter the command 'c' to connect to the server or 'q' to quit: ");
+            scanf(" %c", &key);
+
+            switch (key)
+            {
+            case ('c'):
+                {
+                    try_to_enter_web(msg_id, msg_struct_ptr, usr_struct_ptr);
+                    ret = get_package_from_server(msg_id, msg_struct_ptr, usr_struct_ptr);
+                    
+                    if(ret == SUCCESS)
+                    {
+                        return SUCCESS;
+                    }
+
+                    printf("Enable to connect to the server right now, try again later.\n");;
+                    break;
+                }
+            case ('q'):
+                {
+                    return USER_QUITS;
+                    break;
+                }
+            default:
+                {
+                    printf("Invalid command, try one more time\n");
+                }
+            }
+        }   
     }
+
+    return SUCCESS;
 }
 
 #endif

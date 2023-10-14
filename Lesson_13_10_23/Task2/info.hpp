@@ -16,10 +16,11 @@ enum ret_codes
     NO_FEEDBACK = 1,
     SERVER_FULL = 2,
     SUCCESS     = 3,
+    USER_QUITS  = 4,
 };
 
 #define DEBUG
-#define INIT_USR_NUM 100
+#define INIT_USR_NUM 2
 #define MAX_TEXT_LENGTH 100
 #define MSG_SIZE (sizeof(pid_t) * 2 + sizeof(size_t) + sizeof(char) * MAX_TEXT_LENGTH)
 
@@ -28,6 +29,12 @@ enum MSG_types
     USER_INIT_TYPE    = 1,
     USER_DEL_TYPE     = 2,
     USER_MSG_SND_TYPE = 3,
+};
+
+enum flags
+{
+    NOTIFY_NEW = 1,
+    NOTIFY_OFF = 2,
 };
 
 typedef struct USR_struct
