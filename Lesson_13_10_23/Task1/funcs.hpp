@@ -5,7 +5,7 @@
 #include <sys/msg.h>
 #include <sys/stat.h>
 
-// #define DEBUG
+#define DEBUG
 const int msg_type = 1;
 
 struct Message

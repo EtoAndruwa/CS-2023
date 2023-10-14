@@ -26,6 +26,7 @@ int main()
             }
         }
     }
+    
 
     msgctl(msg_id, IPC_RMID, NULL);
     return 0;
