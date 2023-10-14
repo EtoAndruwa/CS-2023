@@ -12,10 +12,11 @@ int main()
     int ret = connect_to_web(msg_id, &msg_struct, &usr_struct);
     if(ret == SUCCESS)
     {
-        client_logic();
+        client_logic(msg_id, &msg_struct, &usr_struct);
     }
 
     leave_web(msg_id, &msg_struct, &usr_struct);
 
     return 0;
 }
+    

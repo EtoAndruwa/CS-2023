@@ -58,7 +58,7 @@ int notify_all(const int msg_id, const pid_t usr_id, const size_t notif_flag, MS
         if(srv_struct_ptr->users[i].usr_id != 0 && notif_flag == NOTIFY_OFF)
         {
             msg_struct_ptr->msg_type = srv_struct_ptr->users[i].usr_id;
-            sprintf(notify_text, "\nUser %ld is now offline.\n", usr_id);
+            sprintf(notify_text, "User %ld is now offline.", usr_id);
             printf("Text: %s\n", notify_text);
 
             strcpy(msg_struct_ptr->text, notify_text);
@@ -101,6 +101,10 @@ int check_for_new(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* srv_
             }
 
             notify_all(msg_id, msg_struct_ptr->sender_id, NOTIFY_NEW, msg_struct_ptr, srv_struct_ptr);
+
+            printf("\n++++++++++++++++++++USER ADDED++++++++++++++++++++\n");
+            srv_struct_print(srv_struct_ptr);
+            printf("++++++++++++++++++++USER ADDED++++++++++++++++++++\n");
         }
         else
         {
@@ -118,10 +122,6 @@ int check_for_new(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* srv_
                 return -1;
             }
         }
-
-        printf("\n++++++++++++++++++++USER ADDED++++++++++++++++++++\n");
-        srv_struct_print(srv_struct_ptr);
-        printf("++++++++++++++++++++USER ADDED++++++++++++++++++++\n");
     }
 }
 
@@ -144,11 +144,11 @@ int check_for_offline(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* 
             }
         }
 
+        notify_all(msg_id, msg_struct_ptr->sender_id, NOTIFY_OFF, msg_struct_ptr, srv_struct_ptr);
+
         printf("\n----------------USER DELETED----------------\n");
         srv_struct_print(srv_struct_ptr);
         printf("----------------USER DELETED----------------\n");
-
-        notify_all(msg_id, msg_struct_ptr->sender_id, NOTIFY_OFF, msg_struct_ptr, srv_struct_ptr);
     }
 }
 

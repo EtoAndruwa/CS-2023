@@ -46,7 +46,7 @@ void print_user(const USR_struct* const usr_struct_ptr)
 void print_help()
 {
     printf("\n==================HELP==================\n");
-    printf("s - to send the message\n");
+    printf("c - to chat with others\n");
     printf("q - to quit the messanger\n");
     printf("h - to print help one more time\n");
     printf("==================HELP==================\n");
@@ -75,20 +75,31 @@ int leave_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_stru
     }
 }
 
-int client_logic()
+int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struct_ptr)
 {
     char key = 0;
     print_help();
     while (key != 'q')
     {
+        
         printf("\nEnter the command: ");
         scanf(" %c", &key);
 
         switch (key)
         {
-        case ('s'):
+        case ('c'):
             {
-
+                bool is_chatting = true;
+                while (is_chatting)
+                {
+                    int ret_val = -1;
+                    ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, IPC_NOWAIT);
+                    if(ret_val != -1)
+                    {
+                        printf("%s\n", msg_struct_ptr->text);
+                    }
+                    
+                }
                 break;
             }
         case ('h'):
