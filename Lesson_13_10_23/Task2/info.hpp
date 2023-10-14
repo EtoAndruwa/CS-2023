@@ -10,6 +10,13 @@
 #include <sys/types.h>
 #include <errno.h>
 
+enum ret_codes
+{
+    RETURN_OK   = 0,
+    NO_FEEDBACK = 1,
+    SERVER_FULL = 2,
+    SUCCESS     = 3,
+};
 
 #define DEBUG
 #define INIT_USR_NUM 100

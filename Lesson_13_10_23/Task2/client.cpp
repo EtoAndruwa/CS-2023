@@ -9,14 +9,9 @@ int main()
     usr_ctor(&usr_struct);
     print_user(&usr_struct);
 
-    bool coonected = false;
-    while(!coonected)
-    {
-        enter_web(msg_id, &msg_struct, &usr_struct);
-        
-    }
-
+    connect_to_web(msg_id, &msg_struct, &usr_struct);
     client_logic();
     leave_web(msg_id, &msg_struct, &usr_struct);
+    
     return 0;
 }

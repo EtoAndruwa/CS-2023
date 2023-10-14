@@ -46,11 +46,11 @@ int main()
                             strcpy(srv_struct.users[i].usr_name, "");
                             srv_struct.free_cell = i;
                             srv_struct.user_number--;
+                            srv_struct.free_cell = i;
 
                             break;
                         }
                     }
-                    srv_struct.user_number--;
                     srv_struct_print(&srv_struct);
                 }
             }
@@ -58,10 +58,22 @@ int main()
             {
                 if (srv_struct.user_number != INIT_USR_NUM)
                 {
-                    srv_struct.users[srv_struct.user_number].usr_id   = msg_struct.sender_id;
+                    srv_struct.users[srv_struct.user_number].usr_id = msg_struct.sender_id;
                     strcpy(srv_struct.users[srv_struct.user_number].usr_name, msg_struct.text);
                     srv_struct.user_number++;
                     srv_struct.free_cell++;
+
+
+                    msg_struct.logic_package = SUCCESS;
+                    msg_struct.msg_type = msg_struct.sender_id;
+
+                    int ret_val = msgsnd(msg_id, &msg_struct, MSG_SIZE, 0);
+                    if (ret_val == -1)
+                    {
+                        printf("errno %d\n", errno);
+                        printf("ERROR: cannot send feedback to the user\n");
+                        return -1;
+                    }
 
                     srv_struct_print(&srv_struct);
                 }
@@ -70,6 +82,7 @@ int main()
                     printf("Unable to connect user to the server\n");
                     printf("The signal will be sent to the user\n");
 
+                    srv_struct_print(&srv_struct);
                 }
             }
         }
