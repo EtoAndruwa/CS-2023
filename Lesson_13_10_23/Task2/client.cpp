@@ -7,7 +7,6 @@ int main()
 
     int msg_id = get_msg_id();
     usr_ctor(&usr_struct);
-    // print_user(&usr_struct);
 
     int ret = connect_to_web(msg_id, &msg_struct, &usr_struct);
     if(ret == SUCCESS)

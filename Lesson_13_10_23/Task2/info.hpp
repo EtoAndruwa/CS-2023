@@ -20,7 +20,7 @@ enum ret_codes
     USER_QUITS  = 4,
 };
 
-#define DEBUG
+// #define DEBUG
 #define INIT_USR_NUM 100
 #define PREFIX_TEXT_LENGTH 60
 #define MAX_TEXT_LENGTH 100
