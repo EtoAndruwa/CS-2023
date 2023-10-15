@@ -22,7 +22,9 @@ enum ret_codes
 
 #define DEBUG
 #define INIT_USR_NUM 2
+#define PREFIX_TEXT_LENGTH 60
 #define MAX_TEXT_LENGTH 100
+#define MSG_TOTAL_LENGHT (MAX_TEXT_LENGTH + PREFIX_TEXT_LENGTH) 
 #define MSG_SIZE (sizeof(pid_t) * 2 + sizeof(size_t) + sizeof(char) * MAX_TEXT_LENGTH)
 
 enum MSG_types
@@ -57,7 +59,7 @@ typedef struct MSG_struct
     pid_t receiver_id;
     pid_t sender_id;
     size_t logic_package;
-    char text[MAX_TEXT_LENGTH]; 
+    char text[MSG_TOTAL_LENGHT]; 
 }MSG_struct;
 
 

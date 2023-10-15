@@ -29,9 +29,18 @@ void srv_struct_print(const SRV_struct* const srv_struct_ptr)
 
 int notify_all(const int msg_id, const pid_t usr_id, const size_t notif_flag, MSG_struct* msg_struct_ptr, SRV_struct* srv_struct_ptr)
 {
-    char notify_text[50];
+    char notify_text[60];
     int ret_val = 0;
     msg_struct_ptr->sender_id = 0;
+    size_t found_usr_id = 0;
+
+    for(size_t i = 0; i < srv_struct_ptr->user_number; i++)
+    {
+        if(srv_struct_ptr->users[i].usr_id == usr_id)
+        {
+            found_usr_id = i;
+        }
+    }
 
     for(size_t i = 0; i < srv_struct_ptr->user_number; i++)
     {
@@ -42,7 +51,7 @@ int notify_all(const int msg_id, const pid_t usr_id, const size_t notif_flag, MS
         if(srv_struct_ptr->users[i].usr_id != 0 && notif_flag == NOTIFY_NEW)
         {
             msg_struct_ptr->msg_type = srv_struct_ptr->users[i].usr_id;
-            sprintf(notify_text, "\nUser %ld is now online!\n", usr_id);
+            sprintf(notify_text, "User \'%s\' with id = \'%ld\' is now online!", srv_struct_ptr->users[found_usr_id].usr_name, usr_id);
             printf("Text: %s\n", notify_text);
 
             strcpy(msg_struct_ptr->text, notify_text);
@@ -58,7 +67,7 @@ int notify_all(const int msg_id, const pid_t usr_id, const size_t notif_flag, MS
         if(srv_struct_ptr->users[i].usr_id != 0 && notif_flag == NOTIFY_OFF)
         {
             msg_struct_ptr->msg_type = srv_struct_ptr->users[i].usr_id;
-            sprintf(notify_text, "User %ld is now offline.", usr_id);
+            sprintf(notify_text, "User \'%s\' with id = \'%ld\' is now offline.", srv_struct_ptr->users[found_usr_id].usr_name, usr_id);
             printf("Text: %s\n", notify_text);
 
             strcpy(msg_struct_ptr->text, notify_text);
@@ -132,9 +141,12 @@ int check_for_offline(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* 
 
     if(ret_val != -1)
     {
+        pid_t usr_id = msg_struct_ptr->sender_id;
+        notify_all(msg_id, msg_struct_ptr->sender_id, NOTIFY_OFF, msg_struct_ptr, srv_struct_ptr);
+
         for (size_t i = 0; i < srv_struct_ptr->user_number; i++)
         {
-            if (srv_struct_ptr->users[i].usr_id == msg_struct_ptr->sender_id)
+            if (srv_struct_ptr->users[i].usr_id == usr_id)
             {
                 srv_struct_ptr->users[i].usr_id = -1;
                 strcpy(srv_struct_ptr->users[i].usr_name, "");
@@ -143,8 +155,6 @@ int check_for_offline(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* 
                 break;
             }
         }
-
-        notify_all(msg_id, msg_struct_ptr->sender_id, NOTIFY_OFF, msg_struct_ptr, srv_struct_ptr);
 
         printf("\n----------------USER DELETED----------------\n");
         srv_struct_print(srv_struct_ptr);
@@ -159,8 +169,7 @@ int check_for_retake(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* s
 
     if(ret_val != -1)
     {
-
-
+        printf("Message received\n");
     }
 }
 

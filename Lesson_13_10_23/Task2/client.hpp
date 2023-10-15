@@ -81,7 +81,6 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
     print_help();
     while (key != 'q')
     {
-        
         printf("\nEnter the command: ");
         scanf(" %c", &key);
 
@@ -98,11 +97,11 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
                 }
                 else
                 {   
-                    #ifdef DEBUG     
-                        printf("Current process id: %ld\n", getpid());
-                        printf("Current process PARENT id: %ld\n", getppid());
-                        printf("fork_val = %ld\n\n", fork_val);
-                    #endif
+                    // #ifdef DEBUG     
+                    //     printf("Current process id: %ld\n", getpid());
+                    //     printf("Current process PARENT id: %ld\n", getppid());
+                    //     printf("fork_val = %ld\n\n", fork_val);
+                    // #endif
 
                     int new_pid = getpid();
                     int new_ppid = getppid();
@@ -112,13 +111,12 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
                     {
                         if(new_ppid == cur_pid)
                         {
-                            int ret_val = -1;
-                            ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, IPC_NOWAIT);
+                            int ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, 0);
                             if(ret_val != -1 && msg_struct_ptr->sender_id == 0)
                             {
                                 printf("\n====NOTIFICATION====\n");
                                 printf("%s\n", msg_struct_ptr->text);
-                                printf("====NOTIFICATION====\n");
+                                printf("====NOTIFICATION====\n\n");
                             }
                             else if(ret_val != -1)
                             {
@@ -127,21 +125,32 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
                         }
                         else if(new_pid == cur_pid)
                         {
-                            char arr[10];
-                            scanf("%s", arr);
-                            printf("Message: %s\n", arr);
+                            char text[MAX_TEXT_LENGTH];
+                            int receiver_id;
+                            scanf("%d ", &receiver_id);
+                            msg_struct_ptr->receiver_id = receiver_id;
+                            printf("msg_struct_ptr->receiver_id %ld\n", msg_struct_ptr->receiver_id);
+                            scanf("%[^\n]s", text);
+                            text[MAX_TEXT_LENGTH - 1] = '\0';
+                            printf("text %s\n", text);
+                            
+                            msg_struct_ptr->msg_type  = USER_MSG_SND_TYPE;
+                            msg_struct_ptr->sender_id = usr_struct_ptr->usr_id;
+                            
+                            sprintf(msg_struct_ptr->text, "From \'%s\'(id \'%ld\'): %s\n", usr_struct_ptr->usr_name, msg_struct_ptr->sender_id, text);
+                            printf("TEXT SENT: %s", msg_struct_ptr->text);
+
+                            int ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
+                            if (ret_val == -1)
+                            {
+                                printf("errno %d\n", errno);
+                                printf("ERROR: cannot send the message to the server\n");
+                                return -1;
+                            }
+                            {
+                                printf("Message was sent\n");
+                            }
                         }
-
-                        // printf("Enter 's' to send message or chat will be updated in 3 seconds.\n");                    
-                        // int sec = 0, 
-                        // trigger = 3000; 
-                        // clock_t before = clock();
-
-                        // do {
-                        // clock_t difference = clock() - before;
-                        // sec = difference * 1000 / CLOCKS_PER_SEC;
-                        // } 
-                        // while (sec < trigger);
                     }
                 }
                 break;

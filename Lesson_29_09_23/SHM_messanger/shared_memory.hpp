@@ -18,7 +18,7 @@ int write_message(const char* const usr_name_ptr, void* shm_mem_ptr)
 {
     char text[MAX_MESSAGE_LENGTH]; 
     printf("Enter your message here: ");
-    scanf(" %[^\n]s", text);
+    scanf("%[^\n]", text);
     text[MAX_MESSAGE_LENGTH - 1] = '\0';
 
     char final_msg[TOTAL_MAX_MSG_LENGTH] = "From ";
