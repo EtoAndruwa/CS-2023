@@ -115,7 +115,7 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
     while (key != 'q')
     {
         printf("\nEnter the command: ");
-        scanf("%c", &key);
+        scanf(" %c", &key);
 
         switch (key)
         {
