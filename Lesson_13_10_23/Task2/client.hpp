@@ -89,16 +89,60 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
         {
         case ('c'):
             {
-                bool is_chatting = true;
-                while (is_chatting)
+                int cur_pid = getpid();
+                int fork_val = fork();
+
+                if(fork_val == -1)
                 {
-                    int ret_val = -1;
-                    ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, IPC_NOWAIT);
-                    if(ret_val != -1)
+                    printf("Cannot start new process\n");
+                }
+                else
+                {   
+                    #ifdef DEBUG     
+                        printf("Current process id: %ld\n", getpid());
+                        printf("Current process PARENT id: %ld\n", getppid());
+                        printf("fork_val = %ld\n\n", fork_val);
+                    #endif
+
+                    int new_pid = getpid();
+                    int new_ppid = getppid();
+
+                    bool is_chatting = true;
+                    while (is_chatting)
                     {
-                        printf("%s\n", msg_struct_ptr->text);
+                        if(new_ppid == cur_pid)
+                        {
+                            int ret_val = -1;
+                            ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, IPC_NOWAIT);
+                            if(ret_val != -1 && msg_struct_ptr->sender_id == 0)
+                            {
+                                printf("\n====NOTIFICATION====\n");
+                                printf("%s\n", msg_struct_ptr->text);
+                                printf("====NOTIFICATION====\n");
+                            }
+                            else if(ret_val != -1)
+                            {
+                                printf("%s\n", msg_struct_ptr->text);
+                            }
+                        }
+                        else if(new_pid == cur_pid)
+                        {
+                            char arr[10];
+                            scanf("%s", arr);
+                            printf("Message: %s\n", arr);
+                        }
+
+                        // printf("Enter 's' to send message or chat will be updated in 3 seconds.\n");                    
+                        // int sec = 0, 
+                        // trigger = 3000; 
+                        // clock_t before = clock();
+
+                        // do {
+                        // clock_t difference = clock() - before;
+                        // sec = difference * 1000 / CLOCKS_PER_SEC;
+                        // } 
+                        // while (sec < trigger);
                     }
-                    
                 }
                 break;
             }
