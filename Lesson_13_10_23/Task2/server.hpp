@@ -60,7 +60,7 @@ int notify_all(const int msg_id, const pid_t usr_id, const size_t notif_flag, MS
             if (ret_val == -1)
             {
                 printf("errno %d\n", errno);
-                printf("ERROR: cannot notify the user \n", srv_struct_ptr->users[i].usr_id);
+                printf("ERROR: cannot notify the user with id %d\n", srv_struct_ptr->users[i].usr_id);
                 return -1;
             }
         }
@@ -76,7 +76,7 @@ int notify_all(const int msg_id, const pid_t usr_id, const size_t notif_flag, MS
             if (ret_val == -1)
             {
                 printf("errno %d\n", errno);
-                printf("ERROR: cannot notify the user \n", srv_struct_ptr->users[i].usr_id);
+                printf("ERROR: cannot notify the user with id %d\n", srv_struct_ptr->users[i].usr_id);
                 return -1;
             }
         }
@@ -169,7 +169,49 @@ int check_for_retake(const int msg_id, MSG_struct* msg_struct_ptr, SRV_struct* s
 
     if(ret_val != -1)
     {
-        printf("Message received\n");
+        if(msg_struct_ptr->logic_package == MSG_FOR_ALL)
+        {
+            printf("MSG_FOR_ALL\n");
+            for(size_t i = 0; i < srv_struct_ptr->user_number; i++)
+            {
+                if(srv_struct_ptr->users[i].usr_id == msg_struct_ptr->sender_id)
+                {
+                    continue;
+                }
+                if(srv_struct_ptr->users[i].usr_id != 0)
+                {
+                    msg_struct_ptr->receiver_id = srv_struct_ptr->users[i].usr_id;
+                    msg_struct_ptr->msg_type    = srv_struct_ptr->users[i].usr_id;
+
+                    // printf("srv_struct_ptr->users[%d].usr_id = %d\n", i, srv_struct_ptr->users[i].usr_id);
+                    // printf("msg_struct_ptr->logic_package: %d\n", msg_struct_ptr->logic_package);
+                    // printf("msg_struct_ptr->msg_type: %d\n", msg_struct_ptr->msg_type);
+                    // printf("msg_struct_ptr->receiver_id: %d\n", msg_struct_ptr->receiver_id);
+                    // printf("msg_struct_ptr->sender_id: %d\n", msg_struct_ptr->sender_id);
+                    // printf("msg_struct_ptr->text: %s\n", msg_struct_ptr->text);
+
+                    ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
+                    if (ret_val == -1)
+                    {
+                        printf("errno %d\n", errno);
+                        printf("ERROR: cannot resend the message to the user with id %d\n", srv_struct_ptr->users[i].usr_id);
+                    }
+                }
+            } 
+        }
+        else if(msg_struct_ptr->logic_package == MSG_PRIVATE)
+        {
+            printf("MSG_PRIVATE\n");
+            msg_struct_ptr->msg_type = msg_struct_ptr->receiver_id;
+
+            ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
+            if (ret_val == -1)
+            {
+                printf("errno %d\n", errno);
+                printf("ERROR: cannot resend the message to the user with id %d\n", msg_struct_ptr->receiver_id);
+                return -1;
+            }
+        }
     }
 }
 

@@ -21,7 +21,7 @@ enum ret_codes
 };
 
 #define DEBUG
-#define INIT_USR_NUM 2
+#define INIT_USR_NUM 100
 #define PREFIX_TEXT_LENGTH 60
 #define MAX_TEXT_LENGTH 100
 #define MSG_TOTAL_LENGHT (MAX_TEXT_LENGTH + PREFIX_TEXT_LENGTH) 
@@ -36,8 +36,10 @@ enum MSG_types
 
 enum flags
 {
-    NOTIFY_NEW = 1,
-    NOTIFY_OFF = 2,
+    NOTIFY_NEW  = 1,
+    NOTIFY_OFF  = 2,
+    MSG_FOR_ALL = 3,
+    MSG_PRIVATE = 4,
 };
 
 typedef struct USR_struct

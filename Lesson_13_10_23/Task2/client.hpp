@@ -111,7 +111,7 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
                     {
                         if(new_ppid == cur_pid)
                         {
-                            int ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, 0);
+                            int ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, IPC_NOWAIT);
                             if(ret_val != -1 && msg_struct_ptr->sender_id == 0)
                             {
                                 printf("\n====NOTIFICATION====\n");
@@ -125,19 +125,33 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
                         }
                         else if(new_pid == cur_pid)
                         {
+                            msg_struct_ptr->logic_package = MSG_PRIVATE;
                             char text[MAX_TEXT_LENGTH];
+
                             int receiver_id;
                             scanf("%d ", &receiver_id);
                             msg_struct_ptr->receiver_id = receiver_id;
-                            printf("msg_struct_ptr->receiver_id %ld\n", msg_struct_ptr->receiver_id);
+                            // printf("msg_struct_ptr->receiver_id %ld\n", msg_struct_ptr->receiver_id);
+
                             scanf("%[^\n]s", text);
                             text[MAX_TEXT_LENGTH - 1] = '\0';
-                            printf("text %s\n", text);
+                            if(strcasecmp("quit", text) == 0)
+                            {
+                                is_chatting = false;
+                                key = 'q';
+                                break;
+                            }
+                            // printf("text %s\n", text);
                             
                             msg_struct_ptr->msg_type  = USER_MSG_SND_TYPE;
                             msg_struct_ptr->sender_id = usr_struct_ptr->usr_id;
+
+                            if(receiver_id == 0)
+                            {
+                                msg_struct_ptr->logic_package = MSG_FOR_ALL;
+                            }
                             
-                            sprintf(msg_struct_ptr->text, "From \'%s\'(id \'%ld\'): %s\n", usr_struct_ptr->usr_name, msg_struct_ptr->sender_id, text);
+                            sprintf(msg_struct_ptr->text, "From %s (id %ld): %s\n", usr_struct_ptr->usr_name, msg_struct_ptr->sender_id, text);
                             printf("TEXT SENT: %s", msg_struct_ptr->text);
 
                             int ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
