@@ -3,6 +3,19 @@
 
 #include "info.hpp"
 
+int get_user_list(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struct_ptr) // ?
+{
+    msg_struct_ptr->msg_type  = USER_GET_LIST;
+    msg_struct_ptr->sender_id = usr_struct_ptr->usr_id;
+
+    int ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
+    if (ret_val == -1)
+    {
+        printf("errno %d\n", errno);
+        printf("ERROR: cannot get user list. Try again a bit later.\n");
+    }
+}
+
 void get_msg(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struct_ptr) // ok
 {
     int ret_val = msgrcv(msg_id, msg_struct_ptr, MSG_SIZE, usr_struct_ptr->usr_id, IPC_NOWAIT);
@@ -14,11 +27,11 @@ void get_msg(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struc
     }
     else if (ret_val != -1)
     {
-        if(msg_struct_ptr->logic_package == MSG_PRIVATE)
+        if (msg_struct_ptr->logic_package == MSG_PRIVATE)
         {
             printf("(PRIVATE MESSAGE) ");
         }
-        else if(msg_struct_ptr->logic_package == MSG_FOR_ALL)
+        else if (msg_struct_ptr->logic_package == MSG_FOR_ALL)
         {
             printf("(GLOBAL MESSAGE) ");
         }
@@ -30,7 +43,7 @@ int try_to_enter_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* u
 {
     msg_struct_ptr->msg_type  = USER_INIT_TYPE;
     msg_struct_ptr->sender_id = usr_struct_ptr->usr_id;
-    strcpy(msg_struct_ptr->text, usr_struct_ptr->usr_name);
+    sprintf(msg_struct_ptr->text, "%s", usr_struct_ptr->usr_name);
 
     int ret_val = msgsnd(msg_id, msg_struct_ptr, MSG_SIZE, 0);
     if (ret_val == -1)
@@ -64,6 +77,22 @@ void print_help() // ok
     printf("==================HELP==================\n");
 }
 
+void print_help_chat() // ok
+{
+    printf("\n==================HELP==================\n");
+
+    printf("\n-------NOTE-------\n");
+    printf("Template for the message: user_id + text + enter\n");
+    printf("Print \'0\' if you want to send the message to all users in the web\n");
+    printf("Example: 13902 Hello! - this message will be sent to the user with id 13902\n");
+    printf("-------NOTE-------\n\n");   
+
+    printf("quit - to quit the messanger\n");
+    printf("help - to print help one more time\n");
+    printf("list - to print the list of online users\n");
+    printf("==================HELP==================\n\n");
+}
+
 int leave_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_struct_ptr) // ok
 {
     msg_struct_ptr->msg_type    = USER_DEL_TYPE;
@@ -86,13 +115,14 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
     while (key != 'q')
     {
         printf("\nEnter the command: ");
-        scanf(" %c", &key);
+        scanf("%c", &key);
 
         switch (key)
         {
         case ('c'):
             {
                 int cur_pid = getpid();
+                print_help_chat();
                 int fork_val = fork();
 
                 if (fork_val == -1)
@@ -127,7 +157,20 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
                             {
                                 is_chatting = false;
                                 key = 'q';
+                                strcpy(text, "");
                                 break;
+                            }
+                            if (strcasecmp("help", text) == 0) // if user wants to quit from the chat
+                            {
+                                print_help_chat();
+                                strcpy(text, "");
+                                continue;
+                            }
+                            if (strcasecmp("list", text) == 0) // if user wants to quit from the chat
+                            {
+                                get_user_list(msg_id, msg_struct_ptr, usr_struct_ptr);
+                                strcpy(text, "");
+                                continue;
                             }
                             
                             msg_struct_ptr->msg_type  = USER_MSG_SND_TYPE;
@@ -162,7 +205,7 @@ int client_logic(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr_s
             }
         default:
             {
-                printf("Invalid command, try one more time\n");
+                printf("ERROR: invalid command, try one more time.\n");
                 print_help();
             }
         }
@@ -185,7 +228,7 @@ int get_package_from_server(const int msg_id, MSG_struct* msg_struct_ptr, USR_st
     {
         if (msg_struct_ptr->logic_package == SERVER_FULL)
         {
-            printf("Server is full, try to connect to the server later.\n");
+            printf("ERROR: server is full, try to connect to the server later.\n");
             return NO_FEEDBACK;
         }
         else
@@ -201,7 +244,7 @@ int connect_to_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr
     try_to_enter_web(msg_id, msg_struct_ptr, usr_struct_ptr);
     int ret = get_package_from_server(msg_id, msg_struct_ptr, usr_struct_ptr);
 
-    if(ret != SUCCESS)
+    if (ret != SUCCESS)
     {   
         char key = 0;
         while (key != 'q')
@@ -221,7 +264,7 @@ int connect_to_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr
                         return SUCCESS;
                     }
 
-                    printf("Enable to connect to the server right now, try again later.\n");;
+                    printf("ERROR: enable to connect to the server right now, try again later.\n");;
                     break;
                 }
             case ('q'):
@@ -231,7 +274,7 @@ int connect_to_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr
                 }
             default:
                 {
-                    printf("Invalid command, try one more time.\n");
+                    printf("ERROR: invalid command, try one more time.\n");
                 }
             }
         }   

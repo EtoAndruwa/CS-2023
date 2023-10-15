@@ -15,6 +15,7 @@ int main()
         check_for_new(msg_id, &msg_struct, &srv_struct);
         check_for_offline(msg_id, &msg_struct, &srv_struct);    
         check_for_retake(msg_id, &msg_struct, &srv_struct);
+        check_for_user_list(msg_id, &msg_struct, &srv_struct);
     }
 
     msgctl(msg_id, IPC_RMID, NULL);

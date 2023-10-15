@@ -23,15 +23,17 @@ enum ret_codes
 // #define DEBUG
 #define INIT_USR_NUM 100
 #define PREFIX_TEXT_LENGTH 60
-#define MAX_TEXT_LENGTH 100
-#define MSG_TOTAL_LENGHT (MAX_TEXT_LENGTH + PREFIX_TEXT_LENGTH) 
-#define MSG_SIZE (sizeof(pid_t) * 2 + sizeof(size_t) + sizeof(char) * MAX_TEXT_LENGTH)
+#define MAX_TEXT_LENGTH 70 * INIT_USR_NUM
+#define MSG_TOTAL_LENGHT (MAX_TEXT_LENGTH + PREFIX_TEXT_LENGTH)
+#define MSG_SIZE (sizeof(pid_t) * 2 + sizeof(size_t) + sizeof(char) * MSG_TOTAL_LENGHT)
+
 
 enum MSG_types
 {
     USER_INIT_TYPE    = 1,
     USER_DEL_TYPE     = 2,
     USER_MSG_SND_TYPE = 3,
+    USER_GET_LIST     = 4,
 };
 
 enum flags
@@ -40,6 +42,7 @@ enum flags
     NOTIFY_OFF  = 2,
     MSG_FOR_ALL = 3,
     MSG_PRIVATE = 4,
+    USER_LIST   = 5,
 };
 
 typedef struct USR_struct
