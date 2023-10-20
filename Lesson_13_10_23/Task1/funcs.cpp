@@ -3,7 +3,7 @@
 void analog_P(const int msg_id, Message* msg_struct_ptr)
 {
     int ret_val = -1;
-    while(ret_val != 0)
+    while (ret_val != 0)
     {
         ret_val = msgrcv(msg_id, msg_struct_ptr, 0, msg_type, 0);
     }
@@ -27,7 +27,7 @@ int get_msg_id() // ok
         printf("msg_key %d\n", msg_key);
     #endif
     int msg_id = msgget(msg_key, 0666);
-    if(msg_id == -1)
+    if (msg_id == -1)
     {
         #ifdef DEBUG
             printf("msg_key 0666|IPC_CREAT\n");
@@ -41,6 +41,3 @@ int get_msg_id() // ok
 
     return msg_id;
 }
-
-
-

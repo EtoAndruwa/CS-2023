@@ -8,7 +8,7 @@ int main()
 
     printf("Print \'s\' to set semafor\n");
     char key = 0;
-    while(key != 's')
+    while (key != 's')
     {
         printf("\nEnter the command: ");
         scanf(" %c", &key);

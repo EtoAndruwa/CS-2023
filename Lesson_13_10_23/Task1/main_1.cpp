@@ -8,7 +8,7 @@ int main()
 
     printf("Print \'m\' to set msg\n");
     char key = 0;
-    while(key != 'm')
+    while (key != 'm')
     {
         printf("\nEnter the command: ");
         scanf(" %c", &key);

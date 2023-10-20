@@ -6,7 +6,7 @@ void get_msg(const char* const usr_name_ptr, int* const fifo_flag)
     const char* const fifo = cat_fifo(usr_name_ptr);
 
     int desc = 0;
-    if((desc = open(fifo, O_RDONLY)) == -1)
+    if ((desc = open(fifo, O_RDONLY)) == -1)
     {
         printf("\n#######################################\n");
         printf("No messages yet... :,(\n");
@@ -48,7 +48,7 @@ void wrt_msg(const char* const usr_name_ptr)
     char* fifo = cat_fifo(usr_name);
 
     int desc = 0;
-    if((desc = open(fifo, O_WRONLY)) == -1)
+    if ((desc = open(fifo, O_WRONLY)) == -1)
     {
         printf("\n#######################################\n");
         printf("There is no such user online...\n");
@@ -72,7 +72,7 @@ void wrt_msg(const char* const usr_name_ptr)
 void logic(char* const usr_name_ptr, int* const fifo_flag)
 {
     char key = 0;
-    while(key != 'q')
+    while (key != 'q')
     {
         printf("\nEnter the command: ");
         scanf(" %c", &key);

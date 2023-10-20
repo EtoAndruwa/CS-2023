@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define DEBUG
+// #define DEBUG
 
 int main()
 {
@@ -19,7 +19,7 @@ int main()
     #ifdef DEBUG
         printf("shm_mem %d\n", shm_mem);
     #endif
-    if(shm_mem == -1)
+    if (shm_mem == -1)
     {
         #ifdef DEBUG
             printf("shmget 0666|IPC_CREAT\n");

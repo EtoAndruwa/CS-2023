@@ -10,7 +10,7 @@ int main()
     int cur_ppid = getppid();
     int fork_val = fork();
 
-    if(fork_val == -1)
+    if (fork_val == -1)
     {
         printf("Cannot start new process\n");
     }
@@ -25,11 +25,11 @@ int main()
         int new_pid = getpid();
         int new_ppid = getppid();
 
-        if(new_ppid == cur_pid)
+        if (new_ppid == cur_pid)
         {
             printf("I am CHILD process. PID = %lu, PPID = %lu\n", new_pid, new_ppid);
         }
-        else if(new_pid == cur_pid)
+        else if (new_pid == cur_pid)
         {
             printf("I am PARENT process. PID = %lu, PPID = %lu\n", cur_pid, cur_ppid);
         }

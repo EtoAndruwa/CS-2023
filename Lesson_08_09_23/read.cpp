@@ -7,13 +7,12 @@
 
 #define DEBUG
 
-
 int main()
 {
     char* file_name = (char*)"Test_file.txt";
-    int open_ret = open(file_name, O_RDONLY); // opens file
+    int open_ret    = open(file_name, O_RDONLY); // opens file
    
-    if(open_ret == -1)
+    if (open_ret == -1)
     {
         printf("File \"%s\" does not exist.\n", file_name);
     }
@@ -23,11 +22,11 @@ int main()
         int read_ret = read(open_ret, (void*)buff, 20);
         
         #ifdef DEBUG
-            if(read_ret == -1)
+            if (read_ret == -1)
             {
                 printf("ERROR -1 while reading file.\n");
             }
-            else if(read_ret == 0)
+            else if (read_ret == 0)
             {
                 printf("EOF.\n");
             }

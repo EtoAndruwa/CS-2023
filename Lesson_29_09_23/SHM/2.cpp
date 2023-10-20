@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define DEBUG
+// #define DEBUG
 
 int main()
 {
@@ -16,7 +16,7 @@ int main()
         printf("shm_key %d\n", shm_key);
     #endif
     int shm_mem = shmget(shm_key, 3 * sizeof(size_t), 0666);
-    if(shm_mem == -1)
+    if (shm_mem == -1)
     {
         #ifdef DEBUG
             printf("shmget 0666|IPC_CREAT\n");

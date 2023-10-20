@@ -259,7 +259,7 @@ int connect_to_web(const int msg_id, MSG_struct* msg_struct_ptr, USR_struct* usr
                     try_to_enter_web(msg_id, msg_struct_ptr, usr_struct_ptr);
                     ret = get_package_from_server(msg_id, msg_struct_ptr, usr_struct_ptr);
                     
-                    if(ret == SUCCESS)
+                    if (ret == SUCCESS)
                     {
                         return SUCCESS;
                     }

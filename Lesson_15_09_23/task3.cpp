@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int main()
 {
     int pipefd[2];
@@ -36,7 +35,6 @@ int main()
         x = read(pipefd[0], str, NUM);
         printf("Child read %d\n", x);
     }
-
 
     return 0;
 }

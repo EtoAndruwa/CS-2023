@@ -68,7 +68,7 @@ int get_sem_id() // ok
         printf("sem_key %d\n", sem_key);
     #endif
     int sem_id = semget(sem_key, 1, 0666);
-    if(sem_id == -1)
+    if (sem_id == -1)
     {
         #ifdef DEBUG
             printf("semget 0666|IPC_CREAT\n");
@@ -82,5 +82,3 @@ int get_sem_id() // ok
 
     return sem_id;
 }
-
-

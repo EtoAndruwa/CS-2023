@@ -86,7 +86,7 @@ void farewell() // OK
 void logic(char* const usr_name_ptr, void* shm_mem_ptr)
 {
     char key = 0;
-    while(key != 'q')
+    while (key != 'q')
     {
         printf("\nEnter the command: ");
         scanf(" %c", &key);
@@ -143,7 +143,7 @@ int get_shmem() // ok
         printf("shm_key %d\n", shm_key);
     #endif
     int shm_mem = shmget(shm_key, TOTAL_MAX_MSG_LENGTH, 0666);
-    if(shm_mem == -1)
+    if (shm_mem == -1)
     {
         #ifdef DEBUG
             printf("shmget 0666|IPC_CREAT\n");

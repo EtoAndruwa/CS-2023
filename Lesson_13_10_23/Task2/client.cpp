@@ -9,7 +9,7 @@ int main()
     usr_ctor(&usr_struct);
 
     int ret = connect_to_web(msg_id, &msg_struct, &usr_struct);
-    if(ret == SUCCESS)
+    if (ret == SUCCESS)
     {
         client_logic(msg_id, &msg_struct, &usr_struct);
     }
