@@ -33,7 +33,7 @@ void func_p(const int* const sem_id, sembuf* struct_ptr)
 
 void func_v(const int* const sem_id, sembuf* struct_ptr)
 {
-    struct_ptr[0].sem_flg = 0;
+    struct_ptr[0].sem_num = 0;
     struct_ptr[0].sem_flg = 0;
     struct_ptr[0].sem_op = 1;
 
