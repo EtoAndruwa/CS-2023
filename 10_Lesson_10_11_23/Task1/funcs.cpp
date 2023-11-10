@@ -16,28 +16,11 @@ void logic(int argc, char* argv [])
             {
                 while (dirent* dir_struct_ptr = readdir(dir_fd))
                 {   
-                    if (!strcmp(dir_struct_ptr->d_name, "."))
-                    {
-                        printf("%s \t\t <---- This dir\n", dir_struct_ptr->d_name);
-                    }
-                    else if (!strcmp(dir_struct_ptr->d_name, ".."))
-                    {
-                        printf("%s \t\t <---- The parent dir for this\n", dir_struct_ptr->d_name);
-                    }
-                    else if (strstr(dir_struct_ptr->d_name, ".out"))
-                    {
-                        printf("%s%s\n%s", GRN, dir_struct_ptr->d_name, RESET);
-                    }
-                    else if (strstr(dir_struct_ptr->d_name, ".o"))
-                    {
-                        printf("%s%s\n%s", BLU, dir_struct_ptr->d_name, RESET);
-                    }
-                    else 
-                    {
-                        printf("%s\n", dir_struct_ptr->d_name);
-                    }
+                    print_info(dir_struct_ptr);
                 }
             }
+
+            closedir(dir_fd);
         }
         else 
         {
@@ -60,29 +43,11 @@ void logic(int argc, char* argv [])
                 {   
                     stat(dir_struct_ptr->d_name, &buf);
                     printf("\n===================================\n");
-                    if (!strcmp(dir_struct_ptr->d_name, "."))
-                    {
-                        printf("%s \t\t <---- This dir\n", dir_struct_ptr->d_name);
-                    }
-                    else if (!strcmp(dir_struct_ptr->d_name, ".."))
-                    {
-                        printf("%s \t\t <---- The parent dir for this\n", dir_struct_ptr->d_name);
-                    }
-                    else if (strstr(dir_struct_ptr->d_name, ".out"))
-                    {
-                        printf("%s%s\n%s", GRN, dir_struct_ptr->d_name, RESET);
-                    }
-                    else if (strstr(dir_struct_ptr->d_name, ".o"))
-                    {
-                        printf("%s%s\n%s", BLU, dir_struct_ptr->d_name, RESET);
-                    }
-                    else 
-                    {
-                        printf("%s\n", dir_struct_ptr->d_name);
-                    }
+                    print_info(dir_struct_ptr);
                     print_stat(&buf);
                 }
             }
+            closedir(dir_fd);
         }
         else if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-d"))
         {
@@ -100,29 +65,11 @@ void logic(int argc, char* argv [])
                     stat(dir_struct_ptr->d_name, &buf);
                     if (S_ISDIR(buf.st_mode))
                     {
-                        if (!strcmp(dir_struct_ptr->d_name, "."))
-                        {
-                            printf("%s \t\t <---- This dir\n", dir_struct_ptr->d_name);
-                        }
-                        else if (!strcmp(dir_struct_ptr->d_name, ".."))
-                        {
-                            printf("%s \t\t <---- The parent dir for this\n", dir_struct_ptr->d_name);
-                        }
-                        else if (strstr(dir_struct_ptr->d_name, ".out"))
-                        {
-                            printf("%s%s\n%s", GRN, dir_struct_ptr->d_name, RESET);
-                        }
-                        else if (strstr(dir_struct_ptr->d_name, ".o"))
-                        {
-                            printf("%s%s\n%s", BLU, dir_struct_ptr->d_name, RESET);
-                        }
-                        else 
-                        {
-                            printf("%s\n", dir_struct_ptr->d_name);
-                        }
+                        print_info(dir_struct_ptr);
                     }
                 }
             }
+            closedir(dir_fd);
         }
         else 
         {
@@ -145,29 +92,11 @@ void logic(int argc, char* argv [])
                 {   
                     stat(dir_struct_ptr->d_name, &buf);
                     printf("\n===================================\n");
-                    if (!strcmp(dir_struct_ptr->d_name, "."))
-                    {
-                        printf("%s \t\t <---- This dir\n", dir_struct_ptr->d_name);
-                    }
-                    else if (!strcmp(dir_struct_ptr->d_name, ".."))
-                    {
-                        printf("%s \t\t <---- The parent dir for this\n", dir_struct_ptr->d_name);
-                    }
-                    else if (strstr(dir_struct_ptr->d_name, ".out"))
-                    {
-                        printf("%s%s\n%s", GRN, dir_struct_ptr->d_name, RESET);
-                    }
-                    else if (strstr(dir_struct_ptr->d_name, ".o"))
-                    {
-                        printf("%s%s\n%s", BLU, dir_struct_ptr->d_name, RESET);
-                    }
-                    else 
-                    {
-                        printf("%s\n", dir_struct_ptr->d_name);
-                    }
+                    print_info(dir_struct_ptr);
                     print_stat(&buf);
                 }
             }
+            closedir(dir_fd);
         }
         else
         {
@@ -197,3 +126,26 @@ void print_stat(struct stat* buf)
     printf("===================================\n\n");
 }
 
+void print_info(dirent* dir_struct_ptr)
+{
+    if (!strcmp(dir_struct_ptr->d_name, "."))
+    {
+        printf("%s \t\t <---- This dir\n", dir_struct_ptr->d_name);
+    }
+    else if (!strcmp(dir_struct_ptr->d_name, ".."))
+    {
+        printf("%s \t\t <---- The parent dir for this\n", dir_struct_ptr->d_name);
+    }
+    else if (strstr(dir_struct_ptr->d_name, ".out"))
+    {
+        printf("%s%s\n%s", GRN, dir_struct_ptr->d_name, RESET);
+    }
+    else if (strstr(dir_struct_ptr->d_name, ".o"))
+    {
+        printf("%s%s\n%s", BLU, dir_struct_ptr->d_name, RESET);
+    }
+    else 
+    {
+        printf("%s\n", dir_struct_ptr->d_name);
+    }   
+}

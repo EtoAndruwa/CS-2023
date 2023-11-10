@@ -19,6 +19,7 @@
 
 void logic(int argc, char* argv []);
 void print_stat(struct stat* buf);
+void print_info(dirent* dir_struct_ptr);
 
 
 
