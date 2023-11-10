@@ -7,6 +7,8 @@ void logic(int argc, char* argv [])
     case 2:
         if (!strcmp(argv[1], "ls"))
         {
+            struct stat buf;
+
             DIR* dir_fd = opendir(".");
             if (dir_fd == nullptr)
             {
@@ -16,7 +18,11 @@ void logic(int argc, char* argv [])
             {
                 while (dirent* dir_struct_ptr = readdir(dir_fd))
                 {   
-                    print_info(dir_struct_ptr);
+                    stat(dir_struct_ptr->d_name, &buf);
+                    if (!S_ISDIR(buf.st_mode))
+                    {
+                        print_info(dir_struct_ptr, &buf);
+                    }
                 }
             }
 
@@ -28,7 +34,25 @@ void logic(int argc, char* argv [])
         }   
         break;
     case 3: 
-        if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-l"))
+        if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-a"))
+        {
+            struct stat buf;
+
+            DIR* dir_fd = opendir(".");
+            if (dir_fd == nullptr)
+            {
+                printf("case 3: dir_fd is nullptr\n");
+            }
+            else 
+            {
+                while (dirent* dir_struct_ptr = readdir(dir_fd))
+                {   
+                    stat(dir_struct_ptr->d_name, &buf);
+                    print_info(dir_struct_ptr, &buf);
+                }
+            }
+        }
+        else if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-l"))
         {
             struct stat buf;
 
@@ -43,7 +67,7 @@ void logic(int argc, char* argv [])
                 {   
                     stat(dir_struct_ptr->d_name, &buf);
                     printf("\n===================================\n");
-                    print_info(dir_struct_ptr);
+                    print_info(dir_struct_ptr, &buf);
                     print_stat(&buf);
                 }
             }
@@ -65,8 +89,27 @@ void logic(int argc, char* argv [])
                     stat(dir_struct_ptr->d_name, &buf);
                     if (S_ISDIR(buf.st_mode))
                     {
-                        print_info(dir_struct_ptr);
+                        print_info(dir_struct_ptr, &buf);
                     }
+                }
+            }
+            closedir(dir_fd);
+        }
+        else if (!strcmp(argv[1], "ls") && strcmp(argv[2], "-a") && strcmp(argv[2], "-d") && strcmp(argv[2], "-ls"))
+        {
+            struct stat buf;
+
+            DIR* dir_fd = opendir(argv[2]);
+            if (dir_fd == nullptr)
+            {
+                printf("case 3: dir_fd is nullptr\n");
+            }
+            else 
+            {
+                while (dirent* dir_struct_ptr = readdir(dir_fd))
+                {   
+                    stat(dir_struct_ptr->d_name, &buf);
+                    print_info(dir_struct_ptr, &buf);
                 }
             }
             closedir(dir_fd);
@@ -77,7 +120,32 @@ void logic(int argc, char* argv [])
         }
         break;
     case 4:
-        if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-l"))
+        if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-l") && !strcmp(argv[3], "-d"))
+        {
+            struct stat buf;
+
+            DIR* dir_fd = opendir(".");
+            if (dir_fd == nullptr)
+            {
+                printf("case 2: dir_fd is nullptr\n");
+            }
+            else 
+            {
+                while (dirent* dir_struct_ptr = readdir(dir_fd))
+                {   
+                    stat(dir_struct_ptr->d_name, &buf);
+                    if (S_ISDIR(buf.st_mode))
+                    {
+                        printf("\n===================================\n");
+                        print_info(dir_struct_ptr, &buf);
+                        print_stat(&buf);
+                    }
+                }
+            }
+
+            closedir(dir_fd);
+        }
+        else if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-l"))
         {
             struct stat buf;
 
@@ -92,8 +160,49 @@ void logic(int argc, char* argv [])
                 {   
                     stat(dir_struct_ptr->d_name, &buf);
                     printf("\n===================================\n");
-                    print_info(dir_struct_ptr);
+                    print_info(dir_struct_ptr, &buf);
                     print_stat(&buf);
+                }
+            }
+            closedir(dir_fd);
+        }
+        else if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-d"))
+        {
+            struct stat buf;
+
+            DIR* dir_fd = opendir(argv[3]);
+            if (dir_fd == nullptr)
+            {
+                printf("case 4: dir_fd is nullptr\n");
+            }
+            else
+            {
+                while (dirent* dir_struct_ptr = readdir(dir_fd))
+                {   
+                    stat(dir_struct_ptr->d_name, &buf);
+                    if (S_ISDIR(buf.st_mode))
+                    {
+                        print_info(dir_struct_ptr, &buf);
+                    }
+                }
+            }
+            closedir(dir_fd);
+        }
+        else if (!strcmp(argv[1], "ls") && !strcmp(argv[2], "-a"))
+        {
+            struct stat buf;
+
+            DIR* dir_fd = opendir(argv[3]);
+            if (dir_fd == nullptr)
+            {
+                printf("case 3: dir_fd is nullptr\n");
+            }
+            else 
+            {
+                while (dirent* dir_struct_ptr = readdir(dir_fd))
+                {   
+                    stat(dir_struct_ptr->d_name, &buf);
+                    print_info(dir_struct_ptr, &buf);
                 }
             }
             closedir(dir_fd);
@@ -102,8 +211,9 @@ void logic(int argc, char* argv [])
         {
             printf("ERROR: case 4: invalid path for the ls cmd. Try again\n");
         }
+        break;
     default:
-        printf("ERROR: invalid number of args or invalid ls command. Try again\n");
+        printf("ERROR: (default) invalid number of args or invalid ls command. Try again\n");
         break;
     }
 }
@@ -126,15 +236,26 @@ void print_stat(struct stat* buf)
     printf("===================================\n\n");
 }
 
-void print_info(dirent* dir_struct_ptr)
+void print_info(dirent* dir_struct_ptr, struct stat* buf)
 {
-    if (!strcmp(dir_struct_ptr->d_name, "."))
+    if (S_ISDIR(buf->st_mode))
     {
-        printf("%s \t\t <---- This dir\n", dir_struct_ptr->d_name);
+        if (!strcmp(dir_struct_ptr->d_name, "."))
+        {
+            printf("%s%s %s\t\t <---- This dir\n", RED, dir_struct_ptr->d_name, RESET);
+        }
+        else if (!strcmp(dir_struct_ptr->d_name, ".."))
+        {
+            printf("%s%s %s\t\t <---- The parent dir for this\n", RED,dir_struct_ptr->d_name, RESET);
+        }
+        else 
+        {
+            printf("%s%s%s\n", RED, dir_struct_ptr->d_name, RESET);
+        }
     }
-    else if (!strcmp(dir_struct_ptr->d_name, ".."))
+    else if (strstr(dir_struct_ptr->d_name, ".cpp"))
     {
-        printf("%s \t\t <---- The parent dir for this\n", dir_struct_ptr->d_name);
+        printf("%s%s\n%s", CYN, dir_struct_ptr->d_name, RESET);
     }
     else if (strstr(dir_struct_ptr->d_name, ".out"))
     {
