@@ -57,7 +57,6 @@ int logic_inner(int port_sd, char* ip_str_sd, int socket_fd, struct sockaddr_in*
     bool port_changed = false;
     bool port_set     = false;
 
-
     print_help_chat();
 
     while (cmd[0] != 'q')
@@ -94,6 +93,7 @@ int logic_inner(int port_sd, char* ip_str_sd, int socket_fd, struct sockaddr_in*
                 }
 
                 print_help_chat_inner();
+                printf("\nJust write here something...\n");
 
                 int cur_pid  = getpid();
                 int fork_val = fork();
@@ -270,14 +270,3 @@ void get_port_my(int* port_ptr)
     scanf("%d", port_ptr);
     printf("Your port %d\n", *port_ptr);
 }
-
-// void print_portdata(struct sockaddr_in* sock_str)
-// {
-//     printf("\n====================\n");;
-//     printf("sock_str->sin_addr.s_addr: %d\n", sock_str->sin_addr.s_addr);
-//     printf("sock_str->sin_port: %d\n", sock_str->sin_port);
-//     printf("sock_str->sin_family: %d\n", sock_str->sin_family);
-//     printf("====================\n");
-// }
-
-
