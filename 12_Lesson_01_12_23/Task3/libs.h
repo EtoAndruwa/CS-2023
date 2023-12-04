@@ -25,18 +25,18 @@ enum ret_codes
 };
 
 int get_socket();
-int logic_outer(int port_sd, char* ip_str, int socket_fd, struct sockaddr_in* sock_struct_sd, struct sockaddr_in* sock_struct_rc, size_t size_struct_sd, size_t size_struct_rc);
-int logic_inner(int port_sd, char* ip_str, int socket_fd, struct sockaddr_in* sock_struct_sd, struct sockaddr_in* sock_struct_rc, size_t size_struct_sd, size_t size_struct_rc);
-int bind_socket(int socket_fd, const sockaddr* sock_str, size_t size_of_sock_str);
-void write_msg(char* msg_ptr);
+int logic_outer(const int port_sd, const char* const ip_str, const int socket_fd, struct sockaddr_in* const sock_struct_sd, struct sockaddr_in* const sock_struct_rc, const size_t size_struct_sd, const size_t size_struct_rc);
+int logic_inner(const int port_sd, const char* const ip_str, const int socket_fd, struct sockaddr_in* const sock_struct_sd, struct sockaddr_in* const sock_struct_rc, const size_t size_struct_sd, const size_t size_struct_rc);
+int bind_socket(const int socket_fd, const sockaddr* const sock_str, const size_t size_of_sock_str);
+void write_msg(char* const msg_ptr);
 void print_help_outer();
 void print_help_chat();
-int set_sock_struct(const char* ip_str, int port, in_addr* ip_addr_str, struct sockaddr_in* sock_str);
-void get_ip_str(char* ip_str);
-void get_port(int* port_ptr);
+int set_sock_struct(const char* const ip_str, const int port, in_addr* const ip_addr_str, struct sockaddr_in* const sock_str);
+void get_ip_str(char* const ip_str);
+void get_port(int* const port_ptr);
 void print_help_chat_inner();
-void set_my_socket(struct sockaddr_in* sock_struct_sd, char* ip_str, int* port, in_addr* ip_addr_sd);
-void get_port_my(int* port_ptr);
-void get_ip_str_my(char* ip_str);
+void set_my_socket(struct sockaddr_in* const sock_struct_sd, char* const ip_str, int* const port, in_addr* const ip_addr_sd);
+void get_port_my(int* const port_ptr);
+void get_ip_str_my(char* const ip_str);
 
 #endif

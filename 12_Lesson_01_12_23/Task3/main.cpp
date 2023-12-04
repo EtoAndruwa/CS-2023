@@ -21,8 +21,7 @@ int main()
             printf("socket is ok\n");
 
         #endif
-
-
+        
         set_my_socket(&sock_struct_sd, ip_str, &port, &ip_addr_sd);
 
         int bind_rt = bind_socket(socket_fd, (const sockaddr*)(&sock_struct_sd), sizeof(sock_struct_sd));

@@ -5,7 +5,7 @@ int get_socket()
     return socket(AF_INET, SOCK_DGRAM, 0);
 }
 
-int logic_outer(int port_sd, char* ip_str_sd, int socket_fd, struct sockaddr_in* sock_struct_sd, struct sockaddr_in* sock_struct_rc, size_t size_struct_sd, size_t size_struct_rc)
+int logic_outer(const int port_sd, const char* const ip_str_sd, const int socket_fd, struct sockaddr_in* const sock_struct_sd, struct sockaddr_in* const sock_struct_rc, const size_t size_struct_sd, const size_t size_struct_rc)
 {
     char cmd[2];
     print_help_outer();
@@ -43,7 +43,7 @@ int logic_outer(int port_sd, char* ip_str_sd, int socket_fd, struct sockaddr_in*
     }
 }
 
-int logic_inner(int port_sd, char* ip_str_sd, int socket_fd, struct sockaddr_in* sock_struct_sd, struct sockaddr_in* sock_struct_rc, size_t size_struct_sd, size_t size_struct_rc)
+int logic_inner(const int port_sd, const char* const ip_str_sd, const int socket_fd, struct sockaddr_in* const sock_struct_sd, struct sockaddr_in* const sock_struct_rc, const size_t size_struct_sd, const size_t size_struct_rc)
 {
     char cmd[2];
     char ip_str[50];
@@ -187,7 +187,7 @@ int logic_inner(int port_sd, char* ip_str_sd, int socket_fd, struct sockaddr_in*
     }
 }
 
-int set_sock_struct(const char* ip_str, int port, in_addr* ip_addr_str, struct sockaddr_in* sock_str)
+int set_sock_struct(const char* const ip_str, const int port, in_addr* const ip_addr_str, struct sockaddr_in* const sock_str)
 {
     inet_aton(ip_str, ip_addr_str);
     sock_str->sin_addr.s_addr = ip_addr_str->s_addr;
@@ -195,12 +195,12 @@ int set_sock_struct(const char* ip_str, int port, in_addr* ip_addr_str, struct s
     sock_str->sin_family      = AF_INET;
 }
 
-int bind_socket(int socket_fd, const sockaddr* sock_str, size_t size_of_sock_str)
+int bind_socket(const int socket_fd, const sockaddr* const sock_str, const size_t size_of_sock_str)
 {
     return bind(socket_fd, sock_str, size_of_sock_str);
 }
 
-void write_msg(char* msg_ptr)
+void write_msg(char* const msg_ptr)
 {
     char c;
     scanf("%c", &c);
@@ -236,35 +236,35 @@ void print_help_chat() // ok
     printf("==================HELP==================\n");
 }
 
-void get_ip_str(char* ip_str)
+void get_ip_str(char* const ip_str)
 {
     printf("Enter the user's new IP: ");
     scanf("%s", ip_str);
     printf("New IP %s\n", ip_str);
 }
 
-void get_port(int* port_ptr)
+void get_port(int* const port_ptr)
 {
     printf("Enter the user's new port: ");
     scanf("%d", port_ptr);
     printf("New port %d\n", *port_ptr);
 }
 
-void set_my_socket(struct sockaddr_in* sock_struct_sd, char* ip_str, int* port, in_addr* ip_addr_sd)
+void set_my_socket(struct sockaddr_in* const sock_struct_sd, char* const ip_str, int* const port, in_addr* const ip_addr_sd)
 {
     get_ip_str_my(ip_str);
     get_port_my(port);
     set_sock_struct(ip_str, *port, ip_addr_sd, sock_struct_sd);
 }
 
-void get_ip_str_my(char* ip_str)
+void get_ip_str_my(char* const ip_str)
 {
     printf("Enter the your IP: ");
     scanf("%s", ip_str);
     printf("Your IP %s\n", ip_str);
 }
 
-void get_port_my(int* port_ptr)
+void get_port_my(int* const port_ptr)
 {
     printf("Enter the your port: ");
     scanf("%d", port_ptr);
