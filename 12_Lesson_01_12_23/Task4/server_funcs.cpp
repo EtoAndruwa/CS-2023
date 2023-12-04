@@ -298,7 +298,7 @@ int server_routing(const Server_struct* const server)
             }
             case CLIENT_LIST:
             {
-                // send list of clients back
+                send_client_list(server, &msg);
                 break;
             }
             default:
@@ -495,11 +495,6 @@ int send_change_login(const Server_struct* const server_struct, const Message* c
     return RETURN_OK;
 }
 
-void set_confirm_structs(Client_struct* const client, Message* msg, size_t msg_type, const Message* const msg_main_data) // ok
-{
-    msg->msg_type = msg_type;
-    set_sock_struct(msg_main_data->sender_ip, msg_main_data->sender_port, &client->ip_addr_client, &client->sock_struct);
-}
 
 int send_init_retry(const Server_struct* const server_struct, const Message* const msg) // ok
 {
@@ -523,7 +518,7 @@ int send_init_retry(const Server_struct* const server_struct, const Message* con
 
 void print_new_client_data(const Client_struct* const new_client) // ok
 {
-    printf("\n===========NEW CLIENT===========\n");
+    printf("\n\n===========NEW CLIENT===========\n");
     printf("LOGIN: %s\n", new_client->login);
     printf("IP: %s\n", new_client->ip_str);
     printf("PORT: %d\n", new_client->port);
@@ -534,37 +529,67 @@ int send_routing_msg(const Server_struct* const server_struct, const Message* co
 {
     Message new_msg;
     Client_struct client;
+    Client_struct* temp = nullptr;
 
     new_msg.msg_type = MSG_ROUTE;
     strcpy(new_msg.msg_text, msg->msg_text);
     strcpy(new_msg.sender_login, msg->sender_login);
 
-    Client_struct* temp = nullptr;
+    bool user_found = false;
 
     for (size_t i = 0; i < server_struct->cur_user_number; i++)
     {
         if (!strcmp(msg->receiver_login, server_struct->client_arr[i].login))
         {
             temp = &server_struct->client_arr[i];
+            user_found = true;
             break;
         }
     }
 
-    set_sock_struct(temp->ip_str, temp->port, &client.ip_addr_client, &client.sock_struct);
+    if (user_found)
+    {
+        // to the receiver
+        set_sock_struct(temp->ip_str, temp->port, &client.ip_addr_client, &client.sock_struct);
+        int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
 
-    int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
+        if (sendto_ret == -1) 
+        {       
+            printf("\n==================ERROR MESSAGE==================\n");
+            printf("ERROR: (ERR_SEND_ROUTING_MSG) cannot\nsend the routing message\n");
+            printf("==================ERROR MESSAGE==================\n"); 
+            return ERR_SEND_ROUTING_MSG;
+        }
 
-    if (sendto_ret == -1) 
-    {       
-        printf("\n==================ERROR MESSAGE==================\n");
-        printf("ERROR: (ERR_SEND_ROUTING_MSG) cannot\nsend the routiing message\n");
-        printf("==================ERROR MESSAGE==================\n"); 
-        return ERR_SEND_ROUTING_MSG;
+        // to the sender
+        new_msg.msg_type = MSG_SENT;
+        set_sock_struct(msg->sender_ip, msg->sender_port, &client.ip_addr_client, &client.sock_struct);
+        sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
+
+        if (sendto_ret == -1) 
+        {       
+            printf("\n==================ERROR MESSAGE==================\n");
+            printf("ERROR: (ERR_SEND_ROUTING_MSG) cannot\nsend the routing message\n");
+            printf("==================ERROR MESSAGE==================\n"); 
+            return ERR_SEND_ROUTING_MSG;
+        }
     }
+    else
+    {
+        new_msg.msg_type = NO_SUCH_CLIENT;
+        set_sock_struct(msg->sender_ip, msg->sender_port, &client.ip_addr_client, &client.sock_struct);
+        int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
 
+        if (sendto_ret == -1) 
+        {       
+            printf("\n==================ERROR MESSAGE==================\n");
+            printf("ERROR: (ERR_SEND_ROUTING_MSG) cannot\nsend the routing message\n");
+            printf("==================ERROR MESSAGE==================\n"); 
+            return ERR_SEND_ROUTING_MSG;
+        }
+    }
     return RETURN_OK;
 }
-
 
 void print_msg_data(const Message* const msg) // ok
 {
@@ -580,36 +605,53 @@ void print_msg_data(const Message* const msg) // ok
     printf("========================MSG DATA========================\n");
 }
 
-// int pack_client_to_list(const Server_struct* const server_struct, Message* const new_msg)
-// {
-//     char temp_name[MAX_LOGIN_LENGTH + 1];
-//     size_t cur_wrote_chars = 0;
-//     char* cur_pos_str_ptr = new_msg->msg_text;
+void set_confirm_structs(Client_struct* const client, Message* msg, size_t msg_type, const Message* const msg_main_data) // ok
+{
+    msg->msg_type = msg_type;
+    set_sock_struct(msg_main_data->sender_ip, msg_main_data->sender_port, &client->ip_addr_client, &client->sock_struct);
+}
 
-//     for ( )
-//     {
+int send_client_list(const Server_struct* const server_struct, const Message* const msg)
+{
+    size_t sent_login_num = 0;
+    Client_struct client;
+    Message new_msg;
+    set_confirm_structs(&client, &new_msg, CLIENT_LIST, msg);
 
+    while (sent_login_num != server_struct->cur_user_number)
+    {
+        sprintf(new_msg.msg_text, "%s, ", server_struct->client_arr[sent_login_num].login);
+        new_msg.msg_text[strlen(server_struct->client_arr[sent_login_num].login) + 2] = '\0';
+        sent_login_num++;
+        printf("sent_login_num %d\n", sent_login_num);
+        printf("msg_text %s\n", new_msg.msg_text);
+        printf("size of msg %d\n", strlen(msg->msg_text));
 
-//     }
-    
-// }
+        for (sent_login_num; sent_login_num < server_struct->cur_user_number; sent_login_num++)
+        {
+            printf("sizeof(new_msg.msg_text) %d\n", sizeof(new_msg.msg_text));
+            printf("sizeof(login) %d\n", sizeof(server_struct->client_arr[sent_login_num].login));
+            if (strlen(new_msg.msg_text) + strlen(server_struct->client_arr[sent_login_num].login + 2) <= MAX_MESSAGE_LENGTH)
+            {
+                strcat(new_msg.msg_text, server_struct->client_arr[sent_login_num].login);
+                strcat(new_msg.msg_text, ", ");
+            }
+            else
+            {
+                break;
+            }
+        }
 
-// int send_client_list(const Server_struct* const server_struct, const Message* const msg)
-// {
-//     Client_struct client;
-//     Message new_msg;
+        printf("Ready msg_text: %s\n", new_msg.msg_text);
 
+        int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
 
+        if (sendto_ret == -1) 
+        {
+            printf("ERROR: (ERR_SEND_CLIENT_LIST) cannot send the init message to the server, try again\n");
+            return ERR_SEND_CLIENT_LIST;
+        }
+    }
 
-//     set_confirm_structs(&client, &new_msg, CLIENT_LIST, msg);
-
-//     int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
-
-//     if (sendto_ret == -1) 
-//     {
-//         printf("ERROR: (ERR_SEND_CLIENT_LIST) cannot send the init message to the server, try again\n");
-//         return ERR_SEND_CLIENT_LIST;
-//     }
-
-//     return RETURN_OK;
-// }
+    return RETURN_OK;
+}

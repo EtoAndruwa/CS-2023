@@ -23,6 +23,7 @@ enum ret_codes
     ERR_GET_SOCKET,
     ERR_BIND_SOCKET,
     ERR_GET_INIT_RESP,
+    ERR_SEND_LIST_REQ,
 };
 
 void auto_get_ip(char* const ip_str);
@@ -51,5 +52,6 @@ void web_inner_logic(const Client_struct* const client_struct, const Server_stru
 void print_web_inner_help();
 void listen(const Client_struct* const client_struct);
 int send_msg_to_user(const Client_struct* const client_struct, const Server_struct* const server_struct, const char* const receiver_login, const char* const msg_text);
+int get_client_list(const Client_struct* const client_struct, const Server_struct* const server_struct);
 
 #endif

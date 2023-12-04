@@ -51,7 +51,7 @@ void ctor_client(Client_struct* const client_struct) // ok
         break;
     }
 
-    printf("\nEnter your login here (up to %d chars): ", MAX_LOGIN_LENGTH);
+    printf("\nEnter your login here (up to %d chars): ", MAX_LOGIN_LENGTH - 1);
     scanf("%s", client_struct->login);
 
     printf("\n==================INFO==================\n");
@@ -68,8 +68,9 @@ void change_port(Client_struct* const client_struct) // ok
 
     if (port >= 0)
     {   
-
-        printf("Port changed from %d to %d\n", client_struct->port, port);
+        printf("\n==============NOTIFICATION==============\n");
+        printf("Port changed from\n%d to %d\n", client_struct->port, port);
+        printf("==============NOTIFICATION==============\n");
         client_struct->port = port;
     }
     else
@@ -279,7 +280,9 @@ void change_server_port(Server_struct* const server_struct) // ok
     }
     else if (temp_port == server_struct->port)
     {
-        printf("You entered the same PORT. PORT will remain unchanged\n");
+        printf("\n==============NOTIFICATION==============\n");
+        printf("You entered the same PORT.\nPORT will remain unchanged\n");
+        printf("==============NOTIFICATION==============\n");
     }
     else if (temp_port < 0)
     {
@@ -450,6 +453,7 @@ void set_del_msg(Message* const msg, const Client_struct* const client_struct) /
 void web_inner_logic(const Client_struct* const client_struct, const Server_struct* const server_struct)
 {
     int cur_client_pid = getpid();
+    print_web_inner_help();
     int fork_val = fork();
 
     if (fork_val == -1)
@@ -473,45 +477,70 @@ void web_inner_logic(const Client_struct* const client_struct, const Server_stru
             }
             else if (new_pid == cur_client_pid)
             {
-                char msg_text[MAX_MESSAGE_LENGTH];
                 char receiver_login[MAX_LOGIN_LENGTH];
-                print_web_inner_help();
-
                 scanf("%s", receiver_login);
+                receiver_login[MAX_LOGIN_LENGTH - 1] = '\0';
 
                 if (!strcmp(receiver_login, "help"))
                 {
                     print_web_inner_help();
                     continue;
                 }
-                else if (!strcmp(receiver_login, "list"))
+                if (!strcmp(receiver_login, "list"))
                 {
-                    // here the request for the list
-                    continue;;                             
+                    get_client_list(client_struct, server_struct);
+                    continue;                           
                 }
-                else if (!strcmp(receiver_login, "stop"))
+                if (!strcmp(receiver_login, "stop"))
                 {
                     client_online = false; 
                     kill(fork_val, SIGTERM); // kills the listening process
                     break;
                 }
-                else 
-                {
-                    scanf("%[^\n]s", msg_text);
-                    send_msg_to_user(client_struct, server_struct, receiver_login, msg_text);
-                }
+            
+                char msg_text[MAX_MESSAGE_LENGTH];
+                scanf("%[^\n]s", msg_text);
+                msg_text[MAX_MESSAGE_LENGTH] = '\0';
+                send_msg_to_user(client_struct, server_struct, receiver_login, msg_text);
+
+                strcpy(msg_text, "");
+                strcpy(receiver_login, "");
             }
         }
+    }
+}
+
+int get_client_list(const Client_struct* const client_struct, const Server_struct* const server_struct)
+{
+    Message msg;
+
+    msg.msg_type = CLIENT_LIST;
+    strcpy(msg.sender_login, client_struct->login);
+    strcpy(msg.sender_ip, client_struct->ip_str);
+    msg.sender_port = client_struct->port;
+
+    int sendto_ret = sendto(client_struct->socket_fd, (const void*)&msg, sizeof(msg), 0, (const sockaddr*)(&server_struct->sock_struct), sizeof(server_struct->sock_struct));
+
+    if (sendto_ret == -1) 
+    {
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_SEND_LIST_REQ) cannot send \nthe client list message to the server, try again\n");
+        printf("==================ERROR MESSAGE==================\n");
+        return ERR_SEND_LIST_REQ;
     }
 }
 
 void print_web_inner_help() // ok
 {
     printf("\n======================HELP======================\n");
+    printf("\n======================NOTE======================\n");
+    printf("Message structure is: User_login msg_text\n");
+    printf("Example: Andrey(User_login) hello!(msg_text)\n");   
+    printf("======================NOTE======================\n\n");
     printf("help - to print help again\n");
     printf("list - to get the list of clients on the server\n");
     printf("stop - to stop chatting\n");
-    printf("======================HELP======================\n");
+    printf("======================HELP======================\n\n");
 }
 
 int send_msg_to_user(const Client_struct* const client_struct, const Server_struct* const server_struct, const char* const receiver_login, const char* const msg_text)
@@ -525,41 +554,15 @@ int send_msg_to_user(const Client_struct* const client_struct, const Server_stru
     strcpy(msg.sender_ip, client_struct->ip_str);
     msg.sender_port = client_struct->port;
 
-    print_msg_data(&msg);
-
     int sendto_ret = sendto(client_struct->socket_fd, (const void*)&msg, sizeof(msg), 0, (const sockaddr*)(&server_struct->sock_struct), sizeof(server_struct->sock_struct));
 
     if (sendto_ret == -1) 
     {
         printf("\n==================ERROR MESSAGE==================\n");
-        printf("ERROR: (ERR_SEND_MSG) cannot send the\ninit message to the server, try again\n");
-        printf("==================ERROR MESSAGE==================\n"); 
+        printf("ERROR: (ERR_SEND_MSG) unable to\nsent the message to the server. Try again\n");
+        printf("==================ERROR MESSAGE==================\n");
         return ERR_SEND_MSG;
     }
-
-    printf("message sent\n");
-
-
-    // socklen_t sock_len = 0;
-    // struct sockaddr temp_struct;
-
-    // int recv_ret = recvfrom(client_struct->socket_fd, (void *)&msg, sizeof(msg), 0, &temp_struct, &sock_len); // does not block
-    // if (recv_ret != -1)
-    // {
-    //     if (msg.msg_type == NO_SUCH_CLIENT)
-    //     {   
-    //         printf("No such user with entered login, check login again or ask for user list\n");
-    //     }
-    //     else if (msg.msg_type == MSG_SENT)
-    //     {
-    //         printf("Message was sent to the user\n");
-    //     }
-    // }
-    // else
-    // {
-    //     printf("ERROR: (ERR_SEND_MSG) unable to sent the message to the server. Try again\n");
-    //     return ERR_SEND_MSG;
-    // }
 }
 
 void debug_print_client_data(const Client_struct* const client_struct) // ok
@@ -608,7 +611,7 @@ void change_login(Client_struct* const client_struct) // ok
     while (!new_name_flag)
     {
         char new_name[MAX_LOGIN_LENGTH];
-        printf("\nEnter your new login here (up to %d chars): ", MAX_LOGIN_LENGTH);
+        printf("\nEnter your new login here (up to %d chars): ", MAX_LOGIN_LENGTH - 1);
         scanf("%s", new_name);
 
         if (!strcmp(new_name, client_struct->login))
@@ -633,15 +636,28 @@ void listen(const Client_struct* const client_struct) // ok
 {
     Message msg;
 
-    print_msg_data(&msg);
-
     socklen_t sock_len = 0;
     struct sockaddr temp_struct;
 
     int recv_ret = recvfrom(client_struct->socket_fd, (void *)&msg, sizeof(msg), 0, &temp_struct, &sock_len); // does not block
-    if (recv_ret != -1 && msg.msg_type == MSG_ROUTE)
+    if (recv_ret != -1)
     {
-        printf("From %s: %s\n", msg.sender_login, msg.msg_text);
+        if (msg.msg_type == MSG_ROUTE) 
+        {
+            printf("From %s:%s\n", msg.sender_login, msg.msg_text);
+        }
+        else if (msg.msg_type == NO_SUCH_CLIENT)
+        {   
+            printf("\n==================ERROR MESSAGE==================\n");
+            printf("No such user with entered login,\ncheck login again or ask for user list\n");
+            printf("==================ERROR MESSAGE==================\n");
+        }
+        else if (msg.msg_type == CLIENT_LIST)
+        {
+            printf("\n==============CLIENT LIST==============\n");
+            printf("Available users: %s\n", msg.msg_text);
+            printf("==============CLIENT LIST==============\n");
+        }
     }
     else 
     {
