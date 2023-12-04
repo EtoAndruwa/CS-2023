@@ -10,6 +10,7 @@
 #include <net/if.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
 #include "config.h"
 
@@ -46,7 +47,9 @@ int disconnect_from_server(const Client_struct* const client_struct, const Serve
 int create_socket(Client_struct* const client_struct);
 void set_server_sock_struct(Server_struct* const server_struct);
 void change_login(Client_struct* const client_struct);
-void web_inner_logic();
+void web_inner_logic(const Client_struct* const client_struct, const Server_struct* const server_struct);
 void print_web_inner_help();
+void listen(const Client_struct* const client_struct);
+int send_msg_to_user(const Client_struct* const client_struct, const Server_struct* const server_struct, const char* const receiver_login, const char* const msg_text);
 
 #endif

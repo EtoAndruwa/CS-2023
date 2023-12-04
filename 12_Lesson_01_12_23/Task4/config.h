@@ -21,6 +21,9 @@ enum msg_types
     INIT_SUCCESS,
     CHANGE_LOGIN,
     INIT_RETRY,
+    CLIENT_LIST,
+    NO_SUCH_CLIENT,
+    MSG_SENT
 };
 
 typedef struct Message

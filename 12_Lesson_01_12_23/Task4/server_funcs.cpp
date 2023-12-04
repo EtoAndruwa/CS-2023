@@ -11,12 +11,14 @@ int ctor_server(Server_struct* const server_struct) // ok
         auto_get_ip(server_struct->ip_str);
     #endif
 
+    printf("\n==================INFO==================\n");
     printf("Server IP: %s\n", server_struct->ip_str);
     server_struct->port = DEFAULT_SERVER_PORT;
     printf("Server default PORT: %d\n", server_struct->port);
+    printf("==================INFO==================\n");
 
     char c[2];
-    printf("Would you like to change the server's default port value? (y/n): ");
+    printf("\nWould you like to change the server's default port value? (y/n): ");
     scanf("%s", c);
 
     switch (c[0])
@@ -31,7 +33,9 @@ int ctor_server(Server_struct* const server_struct) // ok
         break;
     }
     default:
-        printf("ERROR: invalid command, port will remain default\n");
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: invalid command, port will\nremain default value\n");
+        printf("==================ERROR MESSAGE==================\n"); 
         break;
     }
 
@@ -39,7 +43,9 @@ int ctor_server(Server_struct* const server_struct) // ok
 
     if (server_struct->client_arr == nullptr)
     {
-        printf("ERROR: cannot calloc the memory for client_arr. Server will shut down...\n");
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_CALLOC_CLIENT_ARR) cannot calloc\nthe memory for client_arr. Server will shut down...\n");
+        printf("==================ERROR MESSAGE==================\n"); 
         return ERR_CALLOC_CLIENT_ARR;
     }
 
@@ -66,17 +72,21 @@ void dtor_server(Server_struct* const server_struct) // ok
 void change_port(Server_struct* const server_struct) // ok
 {
     int port = 0;
-    printf("Enter new server PORT: ");
+    printf("\nEnter new server PORT: ");
     scanf("%d", &port);
 
     if (port >= 0)
     {
-        printf("Port changed from %d to %d\n", server_struct->port, port);
+        printf("\n==============NOTIFICATION==============\n");
+        printf("Port was changed\nfrom %d to %d\n", server_struct->port, port);
+        printf("==============NOTIFICATION==============\n");
         server_struct->port = port;
     }
     else
     {
-        printf("ERROR: invalid port value. Server port will remain %d\n", server_struct->port);
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: invalid port value.\nServer port will remain %d\n", server_struct->port);
+        printf("==================ERROR MESSAGE==================\n"); 
     }
 }
 
@@ -101,7 +111,7 @@ void auto_get_ip(char* const ip_str) // ok
     ifr.ifr_addr.sa_family = AF_INET;
 
     strncpy(ifr.ifr_name, interf_str, IFNAMSIZ - 1);
-    ioctl(interf_fd, SIOCGIFADDR, &ifr); // get the IP address of the device
+    ioctl(interf_fd, SIOCGIFADDR, &ifr); // gets the IP address of the device
     close(interf_fd);
     sprintf(ip_str, "%s", inet_ntoa(((struct sockaddr_in* )&ifr.ifr_addr)->sin_addr)); // converts back to the string
 }
@@ -110,11 +120,11 @@ void print_clients(const Server_struct* const server_struct) // ok
 {
     for (size_t i = 0; i < server_struct->max_user_number; i++)
     {
-        printf("\n===========CLIENT %d DATA===========\n", i);
-        printf("Client LOGIN: %s\n", server_struct->client_arr[i].login);
-        printf("Client IP: %s\n", server_struct->client_arr[i].ip_str);
-        printf("Client PORT: %d\n", server_struct->client_arr[i].port);
-        printf("===========CLIENT %d DATA===========\n", i);
+        printf("\n===========CLIENT's #%d DATA===========\n", i);
+        printf("Client's LOGIN: %s\n", server_struct->client_arr[i].login);
+        printf("Client's IP: %s\n", server_struct->client_arr[i].ip_str);
+        printf("Client's PORT: %d\n", server_struct->client_arr[i].port);
+        printf("===========CLIENT's #%d DATA===========\n", i);
     }
 }
 
@@ -126,7 +136,9 @@ void logic(const Server_struct* const server_struct)
 
     if (fork_val == -1)
     {
+        printf("\n==================ERROR MESSAGE==================\n");
         printf("ERROR: cannot start the server. Server will shut down\n");
+        printf("==================ERROR MESSAGE==================\n"); 
     }
     else
     {
@@ -153,13 +165,15 @@ void logic(const Server_struct* const server_struct)
     }
 }
 
-int create_socket(Server_struct* const server_struct)
+int create_socket(Server_struct* const server_struct) // ok
 {
     server_struct->socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
 
     if (server_struct->socket_fd == -1)
     {
-        printf("ERROR: get_socket failure\n");
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_GET_SOCKET) get_socket failure\n");
+        printf("==================ERROR MESSAGE==================\n"); 
         return ERR_GET_SOCKET;
     }
     else
@@ -169,7 +183,9 @@ int create_socket(Server_struct* const server_struct)
         int bind_rt = bind(server_struct->socket_fd, (const sockaddr* )&server_struct->sock_struct, sizeof(server_struct->sock_struct));
         if (bind_rt == -1)
         {
-            printf("ERROR: bind_socket failure\n");
+            printf("\n==================ERROR MESSAGE==================\n");
+            printf("ERROR: (ERR_BIND_SOCKET) bind_socket failure\n");
+            printf("==================ERROR MESSAGE==================\n"); 
             return ERR_BIND_SOCKET;
         }
 
@@ -177,27 +193,24 @@ int create_socket(Server_struct* const server_struct)
     }
 }
 
-int set_sock_struct(const char* const ip_str, const int port, in_addr* const ip_addr_str, struct sockaddr_in* const sock_str)
+int set_sock_struct(const char* const ip_str, const int port, in_addr* const ip_addr_str, struct sockaddr_in* const sock_str) // ok
 {
-    printf("\nport %d\n", port);
-    printf("ip_str %s\n", ip_str);
-
     #ifdef LOOP_BACK
         sock_str->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     #else
         inet_aton(ip_str, ip_addr_str);
         sock_str->sin_addr.s_addr = ip_addr_str->s_addr;
     #endif
-    sock_str->sin_port = htons(port);
+    sock_str->sin_port   = htons(port);
     sock_str->sin_family = AF_INET;
 }
 
-int bind_socket(const int socket_fd, const sockaddr* const sock_str, const size_t size_of_sock_str)
+int bind_socket(const int socket_fd, const sockaddr* const sock_str, const size_t size_of_sock_str) // ok
 {
     return bind(socket_fd, sock_str, size_of_sock_str);
 }
 
-int server_maintaining(int fork_val, const Server_struct* const server_struct)
+int server_maintaining(int fork_val, const Server_struct* const server_struct) // ok
 {
     char cmd[30];
 
@@ -237,25 +250,21 @@ int server_routing(const Server_struct* const server)
             {
                 if (server->cur_user_number == server->max_user_number)
                 {
-                    printf("realloc_clients_arr_up\n");
                     if (realloc_clients_arr_up((Server_struct* const)server) == RETURN_OK)
                     {
                         if (check_client(server, &msg) == LOGIN_FREE)
                         {
-                            printf("LOGIN_FREE\n");
                             add_the_client((Server_struct* const)server, &msg);
                             debug_print_server_data(server);
                             send_init_confirm(server, &msg);
                         }
                         else
                         {
-                            printf("send_change_login\n");
                             send_change_login((Server_struct* const)server, &msg);
                         }
                     }
                     else 
                     {
-                        printf("send_init_retry");
                         send_init_retry(server, &msg);
                     }
                 }
@@ -263,14 +272,12 @@ int server_routing(const Server_struct* const server)
                 {
                     if (check_client(server, &msg) == LOGIN_FREE)
                     {
-                        printf("LOGIN_FREE\n");
                         add_the_client((Server_struct* const)server, &msg);
                         debug_print_server_data(server);
                         send_init_confirm(server, &msg);
                     }
                     else
                     {
-                        printf("send_change_login\n");
                         send_change_login((Server_struct* const)server, &msg);
                     }
                 }
@@ -280,14 +287,18 @@ int server_routing(const Server_struct* const server)
             }
             case CLIENT_DEL:
             {
-                printf("CLIENT_DEL\n");
                 delete_client((Server_struct* const)server, &msg);
                 debug_print_server_data(server);
                 break;
             }
             case MSG_ROUTE:
             {
-                // 
+                send_routing_msg(server, &msg);
+                break;
+            }
+            case CLIENT_LIST:
+            {
+                // send list of clients back
                 break;
             }
             default:
@@ -297,7 +308,7 @@ int server_routing(const Server_struct* const server)
     }
 }
 
-void print_maintain_help()
+void print_maintain_help() // ok
 {
     printf("\n============MAINTAIN HELP============\n");
     printf("stop_server - to stop the server\n");
@@ -305,13 +316,8 @@ void print_maintain_help()
     printf("============MAINTAIN HELP============\n");
 }
 
-void print_client_list(const Server_struct* const server_struct)
+void print_client_list(const Server_struct* const server_struct) // ok
 {
-    if (server_struct->cur_user_number == 0)
-    {
-        printf("\nNo clients connected to the server yet\n");
-    }
-
     for (size_t i = 0; i < server_struct->cur_user_number; i++)
     {
         printf("\n===============CLIENT %d DATA===============\n", i);
@@ -322,7 +328,7 @@ void print_client_list(const Server_struct* const server_struct)
     }
 }
 
-void debug_print_client_data(const Client_struct* const client_struct)
+void debug_print_client_data(const Client_struct* const client_struct) // ok
 {
     printf("\n=============CLIENT DEBUG DATA=============\n");
     printf("login: %s\n", client_struct->login);
@@ -334,13 +340,12 @@ void debug_print_client_data(const Client_struct* const client_struct)
     printf("\n=======sock_struct=======\n");
     printf("sock_struct.sin_addr.s_addr: %d\n", client_struct->sock_struct.sin_addr.s_addr);
     printf("sock_struct.sin_family: %d\n", client_struct->sock_struct.sin_family);
-    printf("sock_struct.sin_port: %d\n", client_struct->sock_struct.sin_port);
+    printf("sock_struct.sin_port: %d\n", client_struct->port);
     printf("=======sock_struct=======\n");
-
     printf("=============CLIENT DEBUG DATA=============\n");
 }
 
-void debug_print_server_data(const Server_struct* const server_struct)
+void debug_print_server_data(const Server_struct* const server_struct) // ok
 {
     printf("\n=============SERVER DEBUG DATA=============\n");
     printf("ip_str: %s\n", server_struct->ip_str);
@@ -353,13 +358,12 @@ void debug_print_server_data(const Server_struct* const server_struct)
     printf("\n=======sock_struct=======\n");
     printf("sock_struct.sin_addr: %s\n", inet_ntoa(server_struct->sock_struct.sin_addr));
     printf("sock_struct.sin_family: %d\n", server_struct->sock_struct.sin_family);
-    printf("sock_struct.sin_port: %d\n", server_struct->sock_struct.sin_port);
+    printf("sock_struct.sin_port: %d\n", server_struct->port);
     printf("=======sock_struct=======\n");
-
     printf("=============SERVER DEBUG DATA=============\n");
 }
 
-int check_client(const Server_struct* const server_struct, const Message* const msg)
+int check_client(const Server_struct* const server_struct, const Message* const msg) // ok
 {
     for (size_t i = 0; i < server_struct->cur_user_number; i++)
     {
@@ -374,7 +378,7 @@ int check_client(const Server_struct* const server_struct, const Message* const 
     }
 }
 
-int realloc_clients_arr_up(Server_struct* const server_struct)
+int realloc_clients_arr_up(Server_struct* const server_struct) // ok
 {
     int new_max_usr_num = server_struct->max_user_number * 2;
     Client_struct* new_client_arr = (Client_struct*)realloc(server_struct->client_arr, new_max_usr_num * sizeof(Client_struct));
@@ -391,7 +395,7 @@ int realloc_clients_arr_up(Server_struct* const server_struct)
     }
 }
 
-int realloc_clients_arr_down(Server_struct* const server_struct, size_t new_max_num)
+int realloc_clients_arr_down(Server_struct* const server_struct, size_t new_max_num) // ok
 {   
     Client_struct* new_client_arr = (Client_struct*)realloc(server_struct->client_arr, new_max_num * sizeof(Client_struct));
 
@@ -407,7 +411,7 @@ int realloc_clients_arr_down(Server_struct* const server_struct, size_t new_max_
     }
 }
 
-int add_the_client(Server_struct* const server_struct, const Message* const msg)
+int add_the_client(Server_struct* const server_struct, const Message* const msg) // ok
 {
     Client_struct* new_client = &server_struct->client_arr[server_struct->cur_user_number];
 
@@ -420,7 +424,7 @@ int add_the_client(Server_struct* const server_struct, const Message* const msg)
     print_new_client_data(new_client);
 }
 
-void delete_client(Server_struct* const server_struct, const Message* const msg)
+void delete_client(Server_struct* const server_struct, const Message* const msg) // ok
 {
     Client_struct* client = &server_struct->client_arr[0];
     
@@ -451,26 +455,27 @@ void delete_client(Server_struct* const server_struct, const Message* const msg)
     }
 }
 
-int send_init_confirm(const Server_struct* const server_struct, const Message* const msg)
+int send_init_confirm(const Server_struct* const server_struct, const Message* const msg) // ok
 {
     Client_struct client;
     Message new_msg;
 
     set_confirm_structs(&client, &new_msg, INIT_SUCCESS, msg);
 
-    printf("send_init_confirm\n");
     int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
 
     if (sendto_ret == -1) 
     {
-        printf("ERROR: (ERR_SEND_INIT_PROOF) cannot send the init message to the server, try again\n");
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_SEND_INIT_PROOF) cannot send\nthe init message to the server, try again\n");
+        printf("==================ERROR MESSAGE==================\n"); 
         return ERR_SEND_INIT_PROOF;
     }
 
     return RETURN_OK;
 }
 
-int send_change_login(const Server_struct* const server_struct, const Message* const msg)
+int send_change_login(const Server_struct* const server_struct, const Message* const msg) // ok
 {
     Client_struct client;
     Message new_msg;
@@ -481,20 +486,22 @@ int send_change_login(const Server_struct* const server_struct, const Message* c
 
     if (sendto_ret == -1) 
     {
-        printf("ERROR: (ERR_SEND_CHANGE_LOGIN) cannot send the init message to the server, try again\n");
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_SEND_CHANGE_LOGIN) cannot send\nthe change login message to the server, try again\n");
+        printf("==================ERROR MESSAGE==================\n"); 
         return ERR_SEND_CHANGE_LOGIN;
     }
 
     return RETURN_OK;
 }
 
-void set_confirm_structs(Client_struct* const client, Message* msg, size_t msg_type, const Message* const msg_main_data)
+void set_confirm_structs(Client_struct* const client, Message* msg, size_t msg_type, const Message* const msg_main_data) // ok
 {
     msg->msg_type = msg_type;
     set_sock_struct(msg_main_data->sender_ip, msg_main_data->sender_port, &client->ip_addr_client, &client->sock_struct);
 }
 
-int send_init_retry(const Server_struct* const server_struct, const Message* const msg)
+int send_init_retry(const Server_struct* const server_struct, const Message* const msg) // ok
 {
     Client_struct client;
     Message new_msg;
@@ -505,14 +512,16 @@ int send_init_retry(const Server_struct* const server_struct, const Message* con
 
     if (sendto_ret == -1) 
     {
-        printf("ERROR: (ERR_SEND_INIT_RETRY) cannot send the init message to the server, try again\n");
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_SEND_INIT_RETRY) cannot send\nthe init retry message to the server, try again\n");
+        printf("==================ERROR MESSAGE==================\n"); 
         return ERR_SEND_INIT_RETRY;
     }
 
     return RETURN_OK;
 }
 
-void print_new_client_data(const Client_struct* const new_client)
+void print_new_client_data(const Client_struct* const new_client) // ok
 {
     printf("\n===========NEW CLIENT===========\n");
     printf("LOGIN: %s\n", new_client->login);
@@ -520,3 +529,87 @@ void print_new_client_data(const Client_struct* const new_client)
     printf("PORT: %d\n", new_client->port);
     printf("===========NEW CLIENT===========\n");
 }
+
+int send_routing_msg(const Server_struct* const server_struct, const Message* const msg)
+{
+    Message new_msg;
+    Client_struct client;
+
+    new_msg.msg_type = MSG_ROUTE;
+    strcpy(new_msg.msg_text, msg->msg_text);
+    strcpy(new_msg.sender_login, msg->sender_login);
+
+    Client_struct* temp = nullptr;
+
+    for (size_t i = 0; i < server_struct->cur_user_number; i++)
+    {
+        if (!strcmp(msg->receiver_login, server_struct->client_arr[i].login))
+        {
+            temp = &server_struct->client_arr[i];
+            break;
+        }
+    }
+
+    set_sock_struct(temp->ip_str, temp->port, &client.ip_addr_client, &client.sock_struct);
+
+    int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
+
+    if (sendto_ret == -1) 
+    {       
+        printf("\n==================ERROR MESSAGE==================\n");
+        printf("ERROR: (ERR_SEND_ROUTING_MSG) cannot\nsend the routiing message\n");
+        printf("==================ERROR MESSAGE==================\n"); 
+        return ERR_SEND_ROUTING_MSG;
+    }
+
+    return RETURN_OK;
+}
+
+
+void print_msg_data(const Message* const msg) // ok
+{
+    printf("\n========================MSG DATA========================\n");
+    printf("msg_type: %d\n", msg->msg_type);
+    printf("msg_text: %s\n", msg->msg_text);
+    printf("receiver_ip: %d\n", msg->receiver_ip);
+    printf("receiver_login: %s\n", msg->receiver_login);
+    printf("receiver_port: %d\n", msg->receiver_port);
+    printf("sender_ip: %s\n", msg->sender_ip);
+    printf("sender_login: %s\n", msg->sender_login);
+    printf("sender_port: %d\n", msg->sender_port);
+    printf("========================MSG DATA========================\n");
+}
+
+// int pack_client_to_list(const Server_struct* const server_struct, Message* const new_msg)
+// {
+//     char temp_name[MAX_LOGIN_LENGTH + 1];
+//     size_t cur_wrote_chars = 0;
+//     char* cur_pos_str_ptr = new_msg->msg_text;
+
+//     for ( )
+//     {
+
+
+//     }
+    
+// }
+
+// int send_client_list(const Server_struct* const server_struct, const Message* const msg)
+// {
+//     Client_struct client;
+//     Message new_msg;
+
+
+
+//     set_confirm_structs(&client, &new_msg, CLIENT_LIST, msg);
+
+//     int sendto_ret = sendto(server_struct->socket_fd, (const void*)&new_msg, sizeof(new_msg), 0, (const sockaddr*)(&client.sock_struct), sizeof(client.sock_struct));
+
+//     if (sendto_ret == -1) 
+//     {
+//         printf("ERROR: (ERR_SEND_CLIENT_LIST) cannot send the init message to the server, try again\n");
+//         return ERR_SEND_CLIENT_LIST;
+//     }
+
+//     return RETURN_OK;
+// }

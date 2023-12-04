@@ -26,6 +26,8 @@ enum err_codes
     ERR_SEND_CHANGE_LOGIN,
     ERR_REALLOC_CLIENT_ARR,
     ERR_SEND_INIT_RETRY,
+    ERR_SEND_CLIENT_LIST,
+    ERR_SEND_ROUTING_MSG
 };
 
 enum ret_codes
@@ -62,5 +64,8 @@ void delete_client(Server_struct* const server_struct, const Message* const msg)
 int realloc_clients_arr_down(Server_struct* const server_struct, size_t new_max_num);
 int send_init_retry(const Server_struct* const server_struct, const Message* const msg);
 void print_new_client_data(const Client_struct* const new_client);
+// int send_client_list(const Server_struct* const server_struct, const Message* const msg);
+int send_routing_msg(const Server_struct* const server_struct, const Message* const msg);
+void print_msg_data(const Message* const msg);
 
 #endif
